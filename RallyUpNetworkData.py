@@ -101,17 +101,20 @@ with arcpy.da.SearchCursor(intersected_roads, road_fields) as cursor:
         source_data = 'RoadCenterlines'
         auto_network = 'Y'
         
+        # bike network
         bike_network = 'N'
         bike_l = row[5]
         bike_r = row[6]
         if HasFieldValue(bike_l) or HasFieldValue(bike_r):
             bike_network = 'Y'
-
-        ped_network = 'N'
+        
+        # ped network (it is assumed that anything other than 'prohibited', ped is allowed)
+        ped_network = 'Y'
         ped_l = row[3]
         ped_r = row[4]
         if HasFieldValue(ped_l) or HasFieldValue(ped_r):
-            ped_network = 'Y'
+            if ped_l == 'Prohibited' or ped_r == 'Prohibited':
+                ped_network = 'N'
 
 
         # convert meters to miles

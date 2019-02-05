@@ -2,6 +2,6 @@
 
 import arcpy
 
-network = "C:/data/SanDiego.gdb/Transportation/Streets_ND"
-output_xml_file = "C:/data/NDTemplate.xml"
+network = "C:/temp/NetworkDataset_Testing/NetworkDataset_Restrictions.gdb/NetworkDataset\NetworkDataset_ND"
+output_xml_file = "D:/MultimodalNetwork/network_xml_template/NDTemplate.xml"
 arcpy.na.CreateTemplateFromNetworkDataset(network, output_xml_file)
