@@ -4,7 +4,7 @@ import time
 from datetime import date
 from datetime import datetime
 
-arcpy.env.workspace = 'D:\MultimodalNetwork'
+#arcpy.env.workspace = 'D:\MultimodalNetwork'
 
 # get the date
 today = date.today()
@@ -12,15 +12,15 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 network_file_geodatabase = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb'
+arcpy.env.workspace = network_file_geodatabase
 utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit'
 utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails'
 fifty_sites_1mile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_1mile_Bingham'
+fifty_sites_halfmile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_halfmile_Bingham'
 fgdb_dataset_name = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset'
 bike_ped_auto = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
 
-
 def main():
-
     # create new fgdb
     print(network_file_geodatabase)
     arcpy.CreateFileGDB_management('D:\MultimodalNetwork', 'MM_NetworkDataset_' + strDate +  '.gdb')
@@ -38,16 +38,15 @@ def main():
     #print bike_ped_auto_fields
 
     ## import roads data into network dataset ##
-    utrans_centerlines_for_network = get_IntersectedSouceData(fifty_sites_1mile)
+    utrans_centerlines_for_network = get_IntersectedSouceData(fifty_sites_1mile, utrans_roads, "Roads")
     import_RoadsIntoNetworkDataset(utrans_centerlines_for_network)
 
     ## import trails data into network dataset ##
-    # utrans_trails_for_network = get_IntersectedSouceData(fifty_sites_halfmile)
+    utrans_trails_for_network = get_IntersectedSouceData(fifty_sites_halfmile, utrans_trails, "Trails")
     # import_TrailsIntoNetworkDataset(utrans_trails_for_network)
 
 
 def import_RoadsIntoNetworkDataset(intersected_roads):
-
     # create list of field names
     #                0        1          2           3        4        5         6             7           8  
     road_fields = ['NAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'SHAPE@LENGTH', 'SHAPE@']
@@ -111,21 +110,27 @@ def import_TrailsIntoNetworkDataset():
     # more to come
 
 # intersect utrans roads or trails that fall within the 50 site buffers (.5 or 1 mile)
-def get_IntersectedSouceData(bufferSize):
+def get_IntersectedSouceData(bufferFeatureClass, utransFeatureClass, source):
+    # remove referernce of any feature layers from possible previous function run
+    if arcpy.Exists('fiftySitesBuffer_lyr'):
+        arcpy.Delete_management('fiftySitesBuffer_lyr')
+    if arcpy.Exists('utransIntersected_lyr'):
+        arcpy.Delete_management('utransIntersected_lyr')
+
     # use the .5 or 1 mile fifty sites buffers to create a select by location on the MMP data
-    arcpy.MakeFeatureLayer_management(fifty_sites_1mile, 'fiftySitesOneMile_lyr')
-    arcpy.MakeFeatureLayer_management(utrans_roads, 'utransRoads_lyr')
-    arcpy.SelectLayerByLocation_management('utransRoads_lyr', 'intersect', "fiftySitesOneMile_lyr")
+    arcpy.MakeFeatureLayer_management(bufferFeatureClass, 'fiftySitesBuffer_lyr')
+    arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr')
+    arcpy.SelectLayerByLocation_management('utransIntersected_lyr', 'intersect', 'fiftySitesBuffer_lyr')
     
     # make new feature layer from the intersected, selected utrans roads
-    matchcount = int(arcpy.GetCount_management('utransRoads_lyr')[0]) 
+    matchcount = int(arcpy.GetCount_management('utransIntersected_lyr')[0]) 
     if matchcount == 0:
         print('no features matched spatial and attribute criteria')
     else:
-        intersected_roads = arcpy.CopyFeatures_management('utransRoads_lyr', 'D:\MultimodalNetwork\MultimodalScratchData.gdb\utransIntersectedRoads_' + strDate)
+        intersected_roads = arcpy.CopyFeatures_management('utransIntersected_lyr', 'D:\MultimodalNetwork\MultimodalScratchData.gdb\utransIntersected' + source + '_' + strDate)
         #print('{0} cities that matched criteria written to {0}'.format(matchcount, utrans_IntersectedRoads))
 
-    return 'utransRoads_lyr'
+    return 'utransIntersected_lyr'
 
 
 # check if field has a valid value (not empty string or null)
