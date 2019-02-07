@@ -119,10 +119,17 @@ def get_IntersectedSouceData(bufferFeatureClass, utransFeatureClass, source):
 
     # use the .5 or 1 mile fifty sites buffers to create a select by location on the MMP data
     arcpy.MakeFeatureLayer_management(bufferFeatureClass, 'fiftySitesBuffer_lyr')
-    arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr')
+
+    # make feature layer of utrans data (but, use a where clause if it's trails to limit the segments to transportation trails)
+    if source == "Roads":
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr')
+    if source == "Trails":
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"TransNetwork = 'Yes' or TransNetwork = 'MMP'")
+
+    # instersect the utrans data with the fifty site buffers
     arcpy.SelectLayerByLocation_management('utransIntersected_lyr', 'intersect', 'fiftySitesBuffer_lyr')
     
-    # make new feature layer from the intersected, selected utrans roads
+    # make new feature layer from the intersected utrans data
     matchcount = int(arcpy.GetCount_management('utransIntersected_lyr')[0]) 
     if matchcount == 0:
         print('no features matched spatial and attribute criteria')
