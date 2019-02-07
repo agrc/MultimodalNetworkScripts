@@ -5,6 +5,9 @@
 #               network dataset
 # Requirements: Network Analyst Extension
 
+## you need Desktop 10.6 or Pro to use this code
+## I've been using Pro to run this in the application
+
 #Import system modules
 import arcpy
 import os
@@ -17,21 +20,20 @@ try:
         raise arcpy.ExecuteError("Network Analyst Extension license is not available.")
     
     #Set local variables
-    original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "C:/data/Region2.gdb/Transportation"
-    xml_template = "C:/data/NDTemplate.xml"
+    ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
+    new_network_location = "D:\\MultimodalNetwork\\MM_NetworkDataset_02072019.gdb\\NetworkDataset"
+    xml_template = "D:\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
     
     #Create an XML template from the original network dataset
-    arcpy.na.CreateTemplateFromNetworkDataset(original_network, xml_template)
+    ##arcpy.na.CreateTemplateFromNetworkDataset(original_network, xml_template)
 
     #Create the new network dataset in the output location using the template.
     #The output location must already contain feature classes and tables with 
     #the same names and schema as the original network.
-    arcpy.na.CreateNetworkDatasetFromTemplate(xml_template,
-                                                new_network_location)
+    arcpy.na.CreateNetworkDatasetFromTemplate(xml_template, new_network_location)
     
     #Build the new network dataset
-    arcpy.na.BuildNetwork(os.path.join(new_network_location, "Streets_ND"))
+    arcpy.na.BuildNetwork(os.path.join(new_network_location, "NetworkDataset_ND"))
 
 except Exception as e:
     # If an error occurred, print line number and error message
