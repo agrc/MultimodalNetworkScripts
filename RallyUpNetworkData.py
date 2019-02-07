@@ -43,7 +43,7 @@ def main():
 
     ## import trails data into network dataset ##
     utrans_trails_for_network = get_IntersectedSouceData(fifty_sites_halfmile, utrans_trails, "Trails")
-    # import_TrailsIntoNetworkDataset(utrans_trails_for_network)
+    import_TrailsIntoNetworkDataset(utrans_trails_for_network)
 
 
 def import_RoadsIntoNetworkDataset(intersected_roads):
@@ -105,9 +105,62 @@ def import_RoadsIntoNetworkDataset(intersected_roads):
                 insert_cursor.insertRow(insert_row)
 
         
-def import_TrailsIntoNetworkDataset():
-    test = "hi"
-    # more to come
+def import_TrailsIntoNetworkDataset(intersected_trails):
+    # create list of field names
+    #                    0                1                 2            3 
+    trail_fields = ['PrimaryName', 'DesignatedUses', 'SHAPE@LENGTH', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10          11 
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
+
+    # set up search cursors to select and insert data between feature classes
+    with arcpy.da.SearchCursor(intersected_trails, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
+        # itterate though the intersected utrans road centerline features
+        for utrans_row in search_cursor:
+
+            # create the network dataset values
+            source_data = 'Trails'
+            auto_network = 'N'
+            drive_time = None
+            speed_lmt = None
+            oneway = ''
+
+            # populate bike and ped netork values
+            designated_use = ''
+            bike = ''
+            ped_network = '' 
+            # domains for this field are: ['Bike', 'Pedestrian', 'Multiuse']
+            if HasFieldValue(utrans_row[1]):
+                designated_use = utrans_row[1]
+                
+            if designated_use == 'Bike':
+                bike_network = 'Y'
+                ped_network = 'N'
+            elif designated_use == 'Pedestrian':
+                bike_network = 'N'
+                ped_network = 'Y'
+            elif designated_use == 'Multiuse':
+                bike_network = 'Y'
+                ped_network = 'Y'
+            else:
+                bike_network = '?'
+                ped_network = '?'
+
+            # convert meters to miles
+            miles = utrans_row[2] * 0.000621371
+            miles = round(miles, 10)
+
+            # calculate the time fields
+            ped_time = (miles / 3.1) * 60
+            bike_time = (miles / 9.6) * 60
+
+            # create a list of values that will be used to construct new row
+            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, utrans_row[3])]
+            print insert_row_values
+
+            # insert the new row with the list of values
+            for insert_row in insert_row_values:
+                insert_cursor.insertRow(insert_row)
+
 
 # intersect utrans roads or trails that fall within the 50 site buffers (.5 or 1 mile)
 def get_IntersectedSouceData(bufferFeatureClass, utransFeatureClass, source):
@@ -124,7 +177,7 @@ def get_IntersectedSouceData(bufferFeatureClass, utransFeatureClass, source):
     if source == "Roads":
         arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr')
     if source == "Trails":
-        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"TransNetwork = 'Yes' or TransNetwork = 'MMP'")
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"Status = 'EXISTING' and (TransNetwork = 'Yes' or TransNetwork = 'MMP')")
 
     # instersect the utrans data with the fifty site buffers
     arcpy.SelectLayerByLocation_management('utransIntersected_lyr', 'intersect', 'fiftySitesBuffer_lyr')
