@@ -21,7 +21,7 @@ try:
     
     #Set local variables
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "D:\\MultimodalNetwork\\MM_NetworkDataset_02072019.gdb\\NetworkDataset"
+    new_network_location = "D:\\MultimodalNetwork\\MM_NetworkDataset_02082019.gdb\\NetworkDataset"
     xml_template = "D:\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
     
     #Create an XML template from the original network dataset
@@ -32,8 +32,13 @@ try:
     #the same names and schema as the original network.
     arcpy.na.CreateNetworkDatasetFromTemplate(xml_template, new_network_location)
     
+    print "done creating network, now building it"
+
     #Build the new network dataset
     arcpy.na.BuildNetwork(os.path.join(new_network_location, "NetworkDataset_ND"))
+
+    print "done building the network"
+    print "done!"
 
 except Exception as e:
     # If an error occurred, print line number and error message
