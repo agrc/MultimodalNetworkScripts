@@ -15,8 +15,8 @@ network_file_geodatabase = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +
 arcpy.env.workspace = network_file_geodatabase
 utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit'
 utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails'
-fifty_sites_1mile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_1mile_Bingham'
-fifty_sites_halfmile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_halfmile_Bingham'
+fifty_sites_1mile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_1mile'
+fifty_sites_halfmile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_halfmile'
 fgdb_dataset_name = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset'
 bike_ped_auto = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
 
@@ -40,18 +40,18 @@ def main():
     #print bike_ped_auto_fields
 
     ## -either- import roads data into network dataset by using spatial query ##
-    #utrans_centerlines_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_roads, "Roads")
+    utrans_centerlines_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_roads, "Roads")
     ## -or- import roads data into network dataset by using definition query ##
-    where_clause_roads = r"ZIPCODE_L = '84047' or ZIPCODE_R = '84047'"
-    utrans_centerlines_for_network = get_SourceDataUsingDefQuery(where_clause_roads, utrans_roads, "Roads")
+    #where_clause_roads = r"ZIPCODE_L = '84047' or ZIPCODE_R = '84047'"
+    #utrans_centerlines_for_network = get_SourceDataUsingDefQuery(where_clause_roads, utrans_roads, "Roads")
     # import the roads into network dataset
     import_RoadsIntoNetworkDataset(utrans_centerlines_for_network)
 
     ## -either- import trails data into network dataset by using spatial query ##
-    #utrans_trails_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_trails, "Trails")
+    utrans_trails_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_trails, "Trails")
     ## -or- import trails data into network dataset by using a definition query ##
-    where_clause_trails = r"Status = 'EXISTING' and (TransNetwork = 'Yes' or TransNetwork = 'MMP')"
-    utrans_trails_for_network = get_SourceDataUsingDefQuery(where_clause_trails, utrans_trails, "Trails")
+    #where_clause_trails = r"Status = 'EXISTING' and TransNetwork = 'Yes'"
+    #utrans_trails_for_network = get_SourceDataUsingDefQuery(where_clause_trails, utrans_trails, "Trails")
 
     # import the trails into network dataset
     import_TrailsIntoNetworkDataset(utrans_trails_for_network)
@@ -188,9 +188,9 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, utransFeatureClass, source)
 
     # make feature layer of utrans data (but, also use a where clause if it's trails dataset, to limit the segments to transportation trails only)
     if source == "Roads":
-        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr')
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"CARTOCODE not in (99, 15, 14)")
     if source == "Trails":
-        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"Status = 'EXISTING' and (TransNetwork = 'Yes' or TransNetwork = 'MMP')")
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"Status = 'EXISTING' and TransNetwork = 'Yes'")
 
     # instersect the utrans data with the fifty site buffers
     arcpy.SelectLayerByLocation_management('utransIntersected_lyr', 'intersect', 'spatialSelectPolygon_lyr')
