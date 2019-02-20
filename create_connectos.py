@@ -92,19 +92,29 @@ def main():
 
 
     # append the near verts into the transit stop data, but only append the verts that found a nearby 
-    arcpy.Append_management(stops_near_bike, intersected_bike_network_verts, schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
-    arcpy.Append_management(stops_near_auto, intersected_auto_network_verts, schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
-    arcpy.Append_management(stops_near_ped, intersected_ped_network_verts, schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
+    #arcpy.Append_management(inputs="StopNearBike_02192019", target="VertsBike_02192019", schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
+    arcpy.Append_management(stops_near_bike, intersected_bike_network_verts, schema_type="NO_TEST")
+    arcpy.Append_management(stops_near_auto, intersected_auto_network_verts, schema_type="NO_TEST")
+    arcpy.Append_management(stops_near_ped, intersected_ped_network_verts, schema_type="NO_TEST")
+
+    ## remove the -1 from the NEAR_FID field, before creating the connector lines - by way of making a new feture class
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_bike_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsBike_' + strDate, "NEAR_FID <> -1")
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_auto_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsAuto_' + strDate, "NEAR_FID <> -1")
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_ped_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsPed_' + strDate, "NEAR_FID <> -1")
+    conn_pnts_bike = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsBike_' + strDate
+    conn_pnts_auto = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsAuto_' + strDate
+    conn_pnts_ped = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsPed_' + strDate
+
 
     # create lines between the verts
     outConnectorBike = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\BikeConn_' + strDate
-    arcpy.PointsToLine_management(intersected_bike_network_verts, outConnectorBike, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    arcpy.PointsToLine_management(conn_pnts_bike, outConnectorBike, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     outConnectorAuto = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\AutoConn_' + strDate
-    arcpy.PointsToLine_management(intersected_auto_network_verts, outConnectorAuto, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    arcpy.PointsToLine_management(conn_pnts_auto, outConnectorAuto, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     outConnectorPed = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\PedConn_' + strDate
-    arcpy.PointsToLine_management(intersected_ped_network_verts, outConnectorPed, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    arcpy.PointsToLine_management(conn_pnts_ped, outConnectorPed, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     # remove the identical connectors in each feature class
 
