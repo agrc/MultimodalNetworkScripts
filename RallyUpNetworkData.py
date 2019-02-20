@@ -56,6 +56,10 @@ def main():
     # import the trails into network dataset
     import_TrailsIntoNetworkDataset(utrans_trails_for_network)
 
+    # import transit route data (the transit stops get added in the create_connectors.py file, after they've been exploded to single part)
+    print "import the transit routes"
+    importTransitRoutes()
+
 
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
@@ -251,6 +255,23 @@ def HasFieldValue(field_value):
                 return False
             else:
                 return True
+
+
+def importTransitRoutes():
+    # import the transit routes feature class
+    transit_route_source = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes'
+    arcpy.FeatureClassToFeatureClass_conversion(transit_route_source, r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb' + '\NetworkDataset', 'TransitRoutes')
+    transit_routes_network_dataset =  r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb' + '\NetworkDataset\TransitRoutes'   
+
+    # add miles field
+    #arcpy.AddField_management(transit_routes_network_dataset, "Miles", "DOUBLE", "", "", "", "", "NULLABLE")
+
+    # add transit time field
+    arcpy.AddField_management(transit_routes_network_dataset, "TransitTime", "DOUBLE", "", "", "", "", "NULLABLE")
+
+    # calc values to to miles and transit time fields
+    arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 3.1) * 60", expression_type="PYTHON_9.3")
+     
 
 
 if __name__ == "__main__":

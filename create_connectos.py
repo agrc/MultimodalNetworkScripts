@@ -12,8 +12,9 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 #bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
-bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02112019.gdb\NetworkDataset\BikePedAuto'
-transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops'
+bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset\BikePedAuto'
+transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops'    
+transit_routes = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes'
 transit_stops_singlepoints = ""
 transit_stops_buffered = ""
 auto_lines_in_buffer = ""
@@ -92,7 +93,7 @@ def main():
 
 
     # append the near verts into the transit stop data, but only append the verts that found a nearby 
-    #arcpy.Append_management(inputs="StopNearBike_02192019", target="VertsBike_02192019", schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
+    #arcpy.Append_management(inputs="StopNearBike_02192019", target="VertsBike_02192019", schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetwork "AutoNetwork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
     print "append the bike data"
     arcpy.Append_management(stops_near_bike, intersected_bike_network_verts, schema_type="NO_TEST")
     print "append the auto data"
@@ -141,8 +142,18 @@ def main():
     addAndCalcNetworkFields(ped_connectors, "Ped")
 
     # append the connector data to the BikePedAuto feature class
+    print "append the bike connectors into the BikePedAuto feature class"
+    arcpy.Append_management(bike_connectors, bike_ped_auto, schema_type="NO_TEST")
+    print "append the auto connectors into the BikePedAuto feature class"
+    arcpy.Append_management(auto_connectors, bike_ped_auto, schema_type="NO_TEST")
+    print "append the ped connectors into the BikePedAuto feature class"
+    arcpy.Append_management(ped_connectors, bike_ped_auto, schema_type="NO_TEST")
 
 
+    # import the transit routes and transit tops into the netork dataset
+    print "import transit stops"
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitStops')
+    #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitRoutes')
 
 # this function returns either network line data that intersects the transit stop buffers 
 def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source):
@@ -159,7 +170,7 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source
     if source == "Bike":
         arcpy.MakeFeatureLayer_management(networkFeatureClass, 'linesIntersected_lyr', r"BikeNetwork = 'Y'")
     if source == "Auto":
-        arcpy.MakeFeatureLayer_management(networkFeatureClass, 'linesIntersected_lyr', r"AutoNetork = 'Y'")
+        arcpy.MakeFeatureLayer_management(networkFeatureClass, 'linesIntersected_lyr', r"AutoNetwork = 'Y'")
     if source == "Ped":
         arcpy.MakeFeatureLayer_management(networkFeatureClass, 'linesIntersected_lyr', r"PedNetwork = 'Y'")
 
@@ -210,8 +221,6 @@ def addAndCalcNetworkFields(connector_lines, connector_name):
     arcpy.CalculateField_management(connector_lines, field="PedestrianTime", expression="((!Shape_Length! * 0.000621371) / 3.1) * 60", expression_type="PYTHON_9.3")
 
 
-def appendConnectorsToNetworkDataset(connector):
-    test = test
 
 if __name__ == "__main__":
     # execute only if run as a script
