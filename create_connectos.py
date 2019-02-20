@@ -93,30 +93,55 @@ def main():
 
     # append the near verts into the transit stop data, but only append the verts that found a nearby 
     #arcpy.Append_management(inputs="StopNearBike_02192019", target="VertsBike_02192019", schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetork "AutoNetork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
+    print "append the bike data"
     arcpy.Append_management(stops_near_bike, intersected_bike_network_verts, schema_type="NO_TEST")
+    print "append the auto data"
     arcpy.Append_management(stops_near_auto, intersected_auto_network_verts, schema_type="NO_TEST")
+    print "append the ped data"
     arcpy.Append_management(stops_near_ped, intersected_ped_network_verts, schema_type="NO_TEST")
 
     ## remove the -1 from the NEAR_FID field, before creating the connector lines - by way of making a new feture class
+    print "remove -1 values from bike"
     arcpy.FeatureClassToFeatureClass_conversion(intersected_bike_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsBike_' + strDate, "NEAR_FID <> -1")
+    print "remove -1 values from auto"
     arcpy.FeatureClassToFeatureClass_conversion(intersected_auto_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsAuto_' + strDate, "NEAR_FID <> -1")
+    print "remove -1 values from auto"
     arcpy.FeatureClassToFeatureClass_conversion(intersected_ped_network_verts, 'D:\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsPed_' + strDate, "NEAR_FID <> -1")
     conn_pnts_bike = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsBike_' + strDate
     conn_pnts_auto = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsAuto_' + strDate
     conn_pnts_ped = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsPed_' + strDate
 
-
     # create lines between the verts
-    outConnectorBike = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\BikeConn_' + strDate
-    arcpy.PointsToLine_management(conn_pnts_bike, outConnectorBike, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    print "create the connector lines for bike"
+    bike_connectors = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\BikeConn_' + strDate
+    arcpy.PointsToLine_management(conn_pnts_bike, bike_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
-    outConnectorAuto = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\AutoConn_' + strDate
-    arcpy.PointsToLine_management(conn_pnts_auto, outConnectorAuto, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    print "create the connector lines for auto"
+    auto_connectors = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\AutoConn_' + strDate
+    arcpy.PointsToLine_management(conn_pnts_auto, auto_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
-    outConnectorPed = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\PedConn_' + strDate
-    arcpy.PointsToLine_management(conn_pnts_ped, outConnectorPed, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
+    print "create the connector lines for ped"
+    ped_connectors = 'D:\MultimodalNetwork\MultimodalScratchData.gdb\PedConn_' + strDate
+    arcpy.PointsToLine_management(conn_pnts_ped, ped_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     # remove the identical connectors in each feature class
+    print "delete identical connector lines for bike"
+    arcpy.DeleteIdentical_management(bike_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")
+    print "delete identical connector lines for auto"
+    arcpy.DeleteIdentical_management(auto_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")  
+    print "delete identical connector lines for ped"       
+    arcpy.DeleteIdentical_management(ped_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")
+
+    # call the function to add and calc network fields on the connectors
+    print "add fields and calc values for the bike connector data"
+    addAndCalcNetworkFields(bike_connectors, "Bike")
+    print "add fields and calc values for the auto connector data"
+    addAndCalcNetworkFields(auto_connectors, "Auto")
+    print "add fields and calc values for the ped connector data"
+    addAndCalcNetworkFields(ped_connectors, "Ped")
+
+    # append the connector data to the BikePedAuto feature class
+
 
 
 # this function returns either network line data that intersects the transit stop buffers 
@@ -151,6 +176,42 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source
 
     return 'linesIntersected_lyr'
 
+
+
+def addAndCalcNetworkFields(connector_lines, connector_name):
+    # set local variables
+    source_data = "Connector" + connector_name
+    source_data_FieldLength = 15
+    network_FieldLength = 1
+
+    # Execute AddField twice for two new fields
+    # add source data field
+    arcpy.AddField_management(connector_lines, "SourceData", "TEXT", field_length=source_data_FieldLength)
+    # add network fields
+    arcpy.AddField_management(connector_lines, "AutoNetwork", "TEXT", field_length=network_FieldLength)
+    arcpy.AddField_management(connector_lines, "BikeNetwork", "TEXT", field_length=network_FieldLength)
+    arcpy.AddField_management(connector_lines, "PedNetwork", "TEXT", field_length=network_FieldLength)
+    # add ped_time field
+    arcpy.AddField_management(connector_lines, "PedestrianTime", "DOUBLE", "", "", "", "", "NULLABLE")
+
+
+    # calc the new field values
+    # calc the netork fields
+    if connector_name == "Bike":
+        arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Bike"')
+    if connector_name == "Auto":
+        arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Auto"')
+    if connector_name == "Ped":
+        arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Ped"')
+    # calc the pedtime for all connectors
+    arcpy.CalculateField_management(connector_lines, field="PedestrianTime", expression="((!Shape_Length! * 0.000621371) / 3.1) * 60", expression_type="PYTHON_9.3")
+
+
+def appendConnectorsToNetworkDataset(connector):
+    test = test
 
 if __name__ == "__main__":
     # execute only if run as a script

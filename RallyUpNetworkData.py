@@ -63,7 +63,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     #                   0          1         2           3        4        5         6             7           8  
     road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'SHAPE@LENGTH', 'SHAPE@']
     #                   0           1             2          3           4          5              6              7            8              9             10          11 
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
     with arcpy.da.SearchCursor(utrans_roads_to_import, road_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -123,7 +123,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     #                    0                1                 2            3 
     trail_fields = ['PrimaryName', 'DesignatedUses', 'SHAPE@LENGTH', 'SHAPE@']
     #                   0           1             2          3           4          5              6              7            8              9             10          11 
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
     with arcpy.da.SearchCursor(utrans_trails_to_import, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
