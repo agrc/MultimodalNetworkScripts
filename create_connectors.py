@@ -4,6 +4,8 @@ import time
 from datetime import date
 from datetime import datetime
 
+#### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
+
 #arcpy.env.workspace = 'D:\MultimodalNetwork'
 
 # get the date
@@ -12,9 +14,10 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 #bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
-bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset\BikePedAuto'
-transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops'    
-transit_routes = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes'
+network_dataset = r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
+bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
+transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset     
+transit_routes = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change dates (if it's been updated) for fgdb to current dataset
 transit_stops_singlepoints = ""
 transit_stops_buffered = ""
 auto_lines_in_buffer = ""
@@ -152,8 +155,14 @@ def main():
 
     # import the transit routes and transit tops into the netork dataset
     print "import transit stops"
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitStops')
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
     #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitRoutes')
+
+    # pull out the connectors (that we just appended) from the BikePedAuto to a separate feature class
+    print "creating separate connector network feature class"
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, network_dataset, 'ConnectorNetwork', "ConnectorNetwork = 'Y'")
+
+    print "create_connectors.py script is done!"
 
 # this function returns either network line data that intersects the transit stop buffers 
 def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source):
@@ -202,6 +211,7 @@ def addAndCalcNetworkFields(connector_lines, connector_name):
     arcpy.AddField_management(connector_lines, "AutoNetwork", "TEXT", field_length=network_FieldLength)
     arcpy.AddField_management(connector_lines, "BikeNetwork", "TEXT", field_length=network_FieldLength)
     arcpy.AddField_management(connector_lines, "PedNetwork", "TEXT", field_length=network_FieldLength)
+    arcpy.AddField_management(connector_lines, "ConnectorNetwork", "TEXT", field_length=network_FieldLength)
     # add ped_time field
     arcpy.AddField_management(connector_lines, "PedestrianTime", "DOUBLE", "", "", "", "", "NULLABLE")
 
@@ -209,13 +219,25 @@ def addAndCalcNetworkFields(connector_lines, connector_name):
     # calc the new field values
     # calc the netork fields
     if connector_name == "Bike":
-        arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"Y"')
+        #arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="ConnectorNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"N"')
         arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Bike"')
     if connector_name == "Auto":
-        arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"Y"')
+        #arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="ConnectorNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"N"')
         arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Auto"')
     if connector_name == "Ped":
-        arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"Y"')
+        #arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="ConnectorNetwork", expression='"Y"')
+        arcpy.CalculateField_management(connector_lines, field="AutoNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="BikeNetwork", expression='"N"')
+        arcpy.CalculateField_management(connector_lines, field="PedNetwork", expression='"N"')
         arcpy.CalculateField_management(connector_lines, field="SourceData", expression='"Connector_Ped"')
     # calc the pedtime for all connectors
     arcpy.CalculateField_management(connector_lines, field="PedestrianTime", expression="((!Shape_Length! * 0.000621371) / 3.1) * 60", expression_type="PYTHON_9.3")

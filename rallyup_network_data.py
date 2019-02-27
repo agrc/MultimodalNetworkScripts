@@ -6,6 +6,9 @@ from datetime import datetime
 
 #arcpy.env.workspace = 'D:\MultimodalNetwork'
 
+#### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
+transit_route_source = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
+
 # get the date
 today = date.today()
 strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year) 
@@ -60,14 +63,24 @@ def main():
     print "import the transit routes"
     importTransitRoutes()
 
+    # export out each transit group (from BikePedAuto) to a separate feature class in the network dataset
+    print "creating separate bike network feature class"
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'BikeNetwork', "BikeNetwork = 'Y'")
+    print "creating separate ped network feature class"
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'PedNetwork', "PedNetwork = 'Y'")
+    print "creating separate auto network feature class"
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'AutoNetwork', "AutoNetwork = 'Y'")
+
+    print "rallyup_network_data.py script is done!"
+
 
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     # create list of field names
     #                   0          1         2           3        4        5         6             7           8  
     road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10          11 
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10              11             12
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
     with arcpy.da.SearchCursor(utrans_roads_to_import, road_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -77,7 +90,8 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             # create the network dataset values
             source_data = 'RoadCenterlines'
             auto_network = 'Y'
-        
+            connector_network = 'N'
+
             # bike network
             bike_network = 'N'
             bike_l = utrans_row[5]
@@ -113,7 +127,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             bike_time = (miles / 9.6) * 60
 
             # create a list of values that will be used to construct new row
-            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, utrans_row[8])]
+            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[8])]
             print insert_row_values
 
             # insert the new row with the list of values
@@ -126,8 +140,8 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     # create list of field names
     #                    0                1                 2            3 
     trail_fields = ['PrimaryName', 'DesignatedUses', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10          11 
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10                11            12
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
     with arcpy.da.SearchCursor(utrans_trails_to_import, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -137,6 +151,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
             # create the network dataset values
             source_data = 'Trails'
             auto_network = 'N'
+            connector_network = 'N'
             drive_time = None
             speed_lmt = None
             oneway = ''
@@ -171,7 +186,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
             bike_time = (miles / 9.6) * 60
 
             # create a list of values that will be used to construct new row
-            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, utrans_row[3])]
+            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[3])]
             print insert_row_values
 
             # insert the new row with the list of values
@@ -259,18 +274,26 @@ def HasFieldValue(field_value):
 
 def importTransitRoutes():
     # import the transit routes feature class
-    transit_route_source = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes'
+    # transit_route_source = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
     arcpy.FeatureClassToFeatureClass_conversion(transit_route_source, r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb' + '\NetworkDataset', 'TransitRoutes')
     transit_routes_network_dataset =  r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb' + '\NetworkDataset\TransitRoutes'   
 
     # add miles field
-    #arcpy.AddField_management(transit_routes_network_dataset, "Miles", "DOUBLE", "", "", "", "", "NULLABLE")
+    arcpy.AddField_management(transit_routes_network_dataset, "Length_Miles", "DOUBLE", "", "", "", "", "NULLABLE")
+    # convert meters to miles
+    # calc newly-created mile values to the miles field
+    arcpy.CalculateField_management(transit_routes_network_dataset, field="Length_Miles", expression="(!Shape_Length! * 0.000621371)", expression_type="PYTHON_9.3")
 
     # add transit time field
     arcpy.AddField_management(transit_routes_network_dataset, "TransitTime", "DOUBLE", "", "", "", "", "NULLABLE")
 
-    # calc values to to miles and transit time fields
-    arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 3.1) * 60", expression_type="PYTHON_9.3")
+    # calc values to miles and transit time fields
+    # light-rail is typically 17.2 mph
+    # commuter rail is typically 30 mph
+    # for bus, use 16.9 mph + 18 sec for stop + route length.  for more info see Problem/Solution: https://en.wikibooks.org/wiki/Fundamentals_of_Transportation/Transit_Operations_and_Capacity
+    # to use these options i'll have to use an update cursor and loop through each route to assign the correct value
+    # for not just calc all the routes to the light-rail speed
+    arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 17.2) * 60", expression_type="PYTHON_9.3")
      
 
 
