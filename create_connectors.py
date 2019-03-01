@@ -162,6 +162,13 @@ def main():
     print "creating separate connector network feature class"
     arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, network_dataset, 'ConnectorNetwork', "ConnectorNetwork = 'Y'")
 
+    ## delete the connectors from the BikePedAuto feature class --- use this option if we're going the route of having the connector lines in their own connectivity group (which we currently are doing)
+    query_filter = "ConnectorNetwork = 'Y'"
+    with arcpy.da.UpdateCursor(bike_ped_auto, where_clause=query_filter) as uCur:
+        for dRow in uCur:
+            uCur.deleteRow()
+
+
     print "create_connectors.py script is done!"
 
 # this function returns either network line data that intersects the transit stop buffers 
