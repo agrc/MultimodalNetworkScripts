@@ -14,8 +14,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 #bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
-network_dataset = r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
-bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
+network_dataset = r'D:\MultimodalNetwork\MM_NetworkDataset_02282019.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
+bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_02282019.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
 transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset     
 transit_routes = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change dates (if it's been updated) for fgdb to current dataset
 transit_stops_singlepoints = ""
@@ -155,7 +155,7 @@ def main():
 
     # import the transit routes and transit tops into the netork dataset
     print "import transit stops"
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_02272019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_02282019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
     #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'D:\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitRoutes')
 
     # pull out the connectors (that we just appended) from the BikePedAuto to a separate feature class
