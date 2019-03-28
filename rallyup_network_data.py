@@ -61,7 +61,7 @@ def main():
 
     # import transit route data (the transit stops get added in the create_connectors.py file, after they've been exploded to single part)
     print "import the transit routes"
-    importTransitRoutes()
+    importTransitData()
 
     # export out each transit group (from BikePedAuto) to a separate feature class in the network dataset
     print "creating separate bike network feature class"
@@ -272,7 +272,17 @@ def HasFieldValue(field_value):
                 return True
 
 
-def importTransitRoutes():
+def importTransitData():
+    # import transit stops
+    transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset  
+    # explode transit stops to single points (currently they are mulitpoints)
+    print "explode multipoint stops to single points"
+    transit_stops_singlepoints = "D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate
+    arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")       
+    print "import transit stops"
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
+
+
     # import the transit routes feature class
     # transit_route_source = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
     arcpy.FeatureClassToFeatureClass_conversion(transit_route_source, r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb' + '\NetworkDataset', 'TransitRoutes')
@@ -286,14 +296,38 @@ def importTransitRoutes():
 
     # add transit time field
     arcpy.AddField_management(transit_routes_network_dataset, "TransitTime", "DOUBLE", "", "", "", "", "NULLABLE")
-
+    ### use stops in the calc (below) arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 17.2) * 60", expression_type="PYTHON_9.3")
+    
     # calc values to miles and transit time fields
     # light-rail is typically 17.2 mph
     # commuter rail is typically 30 mph
-    # for bus, use 16.9 mph + 18 sec for stop + route length.  for more info see Problem/Solution: https://en.wikibooks.org/wiki/Fundamentals_of_Transportation/Transit_Operations_and_Capacity
-    # to use these options i'll have to use an update cursor and loop through each route to assign the correct value
-    # for not just calc all the routes to the light-rail speed
-    arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 17.2) * 60", expression_type="PYTHON_9.3")
+
+    # add a field in the route fc to hold the number of stops
+    arcpy.AddField_management(transit_routes_network_dataset, "StopCount", "DOUBLE", "", "", "", "", "NULLABLE")
+
+    # populate the number of stops
+    # loop through transit routes and assign the number of stops based on atttribute query
+    #             0          1            2             3             4
+    fields = ['trip_id', 'route_id', 'StopCount', 'TransitTime', 'Length_Miles']
+    with arcpy.da.UpdateCursor(transit_routes_network_dataset, fields) as cursor:
+        for row in cursor:
+            query_string = "trip_id = " + str(row[0]) + " and route_id = " + str(row[1])
+            rows_tran_stops = [row_stops for row_stops in arcpy.da.SearchCursor(transit_stops_singlepoints, ['trip_id', 'route_id'], query_string)]
+         
+            # populate the StopCount field
+            row[2] = len(rows_tran_stops) 
+         
+            # populate the travel time field
+            # for bus, use 16.9 mph + 18 sec for stop + route length.  for more info see Problem/Solution: https://en.wikibooks.org/wiki/Fundamentals_of_Transportation/Transit_Operations_and_Capacity
+            # note: from website above: [Total travel time = (8.5 mi) / (16.9 mi/hr) + (22 stops)*(18 sec/stop)*(1 hr / 3600 sec) = 0.613 hr = 37 minutes (rounded up to the nearest minute)]
+            row[3] = (row[4] / 16.9 * 60) + (row[2] * .3)  # the fisrt parantheses calcs the time the second parentheses adds the stops (.3 mins = 18 seconds)
+
+            # update the cursor
+            cursor.updateRow(row)
+        
+
+
+
      
 
 
