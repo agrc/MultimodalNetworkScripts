@@ -298,10 +298,29 @@ def importTransitData():
     arcpy.AddField_management(transit_routes_network_dataset, "TransitTime", "DOUBLE", "", "", "", "", "NULLABLE")
     ### use stops in the calc (below) arcpy.CalculateField_management(transit_routes_network_dataset, field="TransitTime", expression="((!Shape_Length! * 0.000621371) / 17.2) * 60", expression_type="PYTHON_9.3")
     
+    # add a field in the route fc to hold the number of stops
+    arcpy.AddField_management(transit_routes_network_dataset, "RouteType", "TEXT", field_length=15)
+    # buffer sgid commuter rail layer and then select by location to find the transit routes that have their center in this buffer - then assing those selected routes a RouteType of 'CommmuterRail'
+    sgid_commuter_rail = r'Database Connections\DC_agrc@SGID10@sgid.agrc.utah.gov.sde\SGID10.TRANSPORTATION.CommuterRailRoutes_UTA'
+    # buffer the comm rail
+    sgid_commuter_rail_buff = r"D:\MultimodalNetwork\MultimodalScratchData.gdb\SGID_CommRailBuff_" + strDate
+    arcpy.Buffer_analysis(sgid_commuter_rail, sgid_commuter_rail_buff, 30)
+    # make feature layer of transit (required input for selection by location)
+    arcpy.MakeFeatureLayer_management(transit_routes_network_dataset,'lyr_transit_fgdb')
+    # select by location - select transit lines in the  buffer
+    select_by_location_selectedFeatures = arcpy.SelectLayerByLocation_management('lyr_transit', "HAVE_THEIR_CENTER_IN", sgid_commuter_rail_buff)
+    # loop through the selected transit lines and assign the commuter lines a value
+    with arcpy.da.UpdateCursor(select_by_location_selectedFeatures, ['RouteType']) as cursor:
+        for row in cursor:
+            row[0] = 'CommuterRail'
+
+            # update the cursor
+            cursor.updateRow(row)
+
+
     # calc values to miles and transit time fields
     # light-rail is typically 17.2 mph
     # commuter rail is typically 30 mph
-
     # add a field in the route fc to hold the number of stops
     arcpy.AddField_management(transit_routes_network_dataset, "StopCount", "DOUBLE", "", "", "", "", "NULLABLE")
 
@@ -325,11 +344,6 @@ def importTransitData():
             # update the cursor
             cursor.updateRow(row)
         
-
-
-
-     
-
 
 if __name__ == "__main__":
     # execute only if run as a script
