@@ -76,9 +76,13 @@ def main():
 
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
+    # get # Get the dictionary of codes and descriptions for cartocode field, for transfering descriptions to RoadClass network field
+    gdb = r'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde'
+    desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
+    
     # create list of field names
     #                   0          1         2           3        4        5         6             7           8           9             10           11  
-    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'DOT_FCLASS', 'DOT_AADT', 'DOT_AADTYR', 'SHAPE@LENGTH', 'SHAPE@']
+    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'CARTOCODE', 'DOT_AADT', 'DOT_AADTYR', 'SHAPE@LENGTH', 'SHAPE@']
     #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15
     network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'RoadClass', 'AADT', 'AADT_YR', 'SHAPE@']
 
@@ -130,7 +134,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             bike_time = (miles / 9.6) * 60
 
             # transfer the road class field over
-            road_class = utrans_row[7]
+            road_class = desc_lu[utrans_row[7]]
 
             # transfer the AADT values over
             if utrans_row[8] is not None:
@@ -294,7 +298,7 @@ def importTransitData():
     transit_stops_singlepoints = "D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate
     arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")       
     print "import transit stops"
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
 
 
     # import the transit routes feature class
@@ -322,7 +326,7 @@ def importTransitData():
     # make feature layer of transit (required input for selection by location)
     arcpy.MakeFeatureLayer_management(transit_routes_network_dataset,'lyr_transit_fgdb')
     # select by location - select transit lines in the  buffer
-    select_by_location_selectedFeatures = arcpy.SelectLayerByLocation_management('lyr_transit', "HAVE_THEIR_CENTER_IN", sgid_commuter_rail_buff)
+    select_by_location_selectedFeatures = arcpy.SelectLayerByLocation_management('lyr_transit_fgdb', "HAVE_THEIR_CENTER_IN", sgid_commuter_rail_buff)
     # loop through the selected transit lines and assign the commuter lines a value
     with arcpy.da.UpdateCursor(select_by_location_selectedFeatures, ['RouteType']) as cursor:
         for row in cursor:
