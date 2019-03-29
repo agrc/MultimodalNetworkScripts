@@ -317,8 +317,7 @@ def importTransitData():
             # update the cursor
             cursor.updateRow(row)
 
-
-    # calc values to miles and transit time fields
+    ## calc values to transit time fields
     # light-rail is typically 17.2 mph
     # commuter rail is typically 30 mph
     # add a field in the route fc to hold the number of stops
@@ -326,21 +325,26 @@ def importTransitData():
 
     # populate the number of stops
     # loop through transit routes and assign the number of stops based on atttribute query
-    #             0          1            2             3             4
-    fields = ['trip_id', 'route_id', 'StopCount', 'TransitTime', 'Length_Miles']
+    #             0          1            2             3             4               5
+    fields = ['trip_id', 'route_id', 'StopCount', 'TransitTime', 'Length_Miles', 'RouteType']
     with arcpy.da.UpdateCursor(transit_routes_network_dataset, fields) as cursor:
         for row in cursor:
             query_string = "trip_id = " + str(row[0]) + " and route_id = " + str(row[1])
             rows_tran_stops = [row_stops for row_stops in arcpy.da.SearchCursor(transit_stops_singlepoints, ['trip_id', 'route_id'], query_string)]
-         
+            
             # populate the StopCount field
             row[2] = len(rows_tran_stops) 
-         
-            # populate the travel time field
-            # for bus, use 16.9 mph + 18 sec for stop + route length.  for more info see Problem/Solution: https://en.wikibooks.org/wiki/Fundamentals_of_Transportation/Transit_Operations_and_Capacity
-            # note: from website above: [Total travel time = (8.5 mi) / (16.9 mi/hr) + (22 stops)*(18 sec/stop)*(1 hr / 3600 sec) = 0.613 hr = 37 minutes (rounded up to the nearest minute)]
-            row[3] = (row[4] / 16.9 * 60) + (row[2] * .3)  # the fisrt parantheses calcs the time the second parentheses adds the stops (.3 mins = 18 seconds)
-
+            
+            # populate the travel time field (calc separately for commuter rail and bus/light rail)
+            # note: use this calc from below website: [Total travel time = (8.5 mi) / (16.9 mi/hr) + (22 stops)*(18 sec/stop)*(1 hr / 3600 sec) = 0.613 hr = 37 minutes (rounded up to the nearest minute)]
+            # for more info see Problem/Solution section: https://en.wikibooks.org/wiki/Fundamentals_of_Transportation/Transit_Operations_and_Capacity
+            if row[5] ==  "CommuterRail":
+                # for commuter rail use 30 mph +  18 sec for stop + route length.
+                row[3] = (row[4] / 30 * 60) + (row[2] * .3)  # the fisrt parantheses calcs the time the second parentheses adds the stops (.3 mins = 18 seconds)
+            else:
+                # for bus and light rail, use 16.9 mph + 18 sec for stop + route length.
+                row[3] = (row[4] / 16.9 * 60) + (row[2] * .3)  # the fisrt parantheses calcs the time the second parentheses adds the stops (.3 mins = 18 seconds)
+            
             # update the cursor
             cursor.updateRow(row)
         
