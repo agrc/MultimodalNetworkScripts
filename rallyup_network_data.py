@@ -77,12 +77,12 @@ def main():
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     # create list of field names
-    #                   0          1         2           3        4        5         6             7           8  
-    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10              11             12
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
+    #                   0          1         2           3        4        5         6             7           8           9             10           11  
+    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'DOT_FCLASS', 'DOT_AADT', 'DOT_AADTYR', 'SHAPE@LENGTH', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'RoadClass', 'AADT', 'AADT_YR', 'SHAPE@']
 
-    # set up search cursors to select and insert data between feature classes
+    # set up search cursors to select and insert data between feature classes (define two cursor on next line: search_cursor and insert_cursor)
     with arcpy.da.SearchCursor(utrans_roads_to_import, road_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
         # itterate though the intersected utrans road centerline features
         for utrans_row in search_cursor:
@@ -91,6 +91,9 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             source_data = 'RoadCenterlines'
             auto_network = 'Y'
             connector_network = 'N'
+            road_class = ''
+            aadt = 0
+            aadt_yr = ''
 
             # bike network
             bike_network = 'N'
@@ -108,7 +111,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                     ped_network = 'N'
 
             # convert meters to miles
-            miles = utrans_row[7] * 0.000621371
+            miles = utrans_row[10] * 0.000621371
             miles = round(miles, 10)
             oneway = ''
             if utrans_row[1] == '0':
@@ -126,8 +129,19 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             ped_time = (miles / 3.1) * 60
             bike_time = (miles / 9.6) * 60
 
+            # transfer the road class field over
+            road_class = utrans_row[7]
+
+            # transfer the AADT values over
+            if utrans_row[8] is not None:
+                aadt = utrans_row[8]
+
+            # transfer the AADT year over
+            aadt_yr = utrans_row[9]
+
+
             # create a list of values that will be used to construct new row
-            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[8])]
+            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, road_class, aadt, aadt_yr, utrans_row[11])]
             print insert_row_values
 
             # insert the new row with the list of values
