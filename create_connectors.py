@@ -14,12 +14,11 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 #bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
-network_dataset = r'D:\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
-bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
+network_dataset = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
+bike_ped_auto = r'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
 ### i'm doing this in the rallup script now...  transit_stops_multipoint = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset     
 transit_routes = r'D:\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change dates (if it's been updated) for fgdb to current dataset
-transit_stops_singlepoints = "D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate #### Note ####: change today's dates if rallyup script was not run today
-transit_stops_singlepoints = ""
+transit_stops_singlepoints = r"D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate #### Note ####: change today's dates if rallyup script was not run today
 transit_stops_buffered = ""
 auto_lines_in_buffer = ""
 bike_lines_in_buffer = ""
@@ -35,7 +34,7 @@ def main():
 
     # create a buffer around the transit stops
     print "buffer the transit stops single points"
-    transit_stops_buffered = "D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBuffd_" + strDate
+    transit_stops_buffered = r"D:\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBuff_" + strDate
     arcpy.Buffer_analysis(transit_stops_singlepoints, transit_stops_buffered, 100)
 
     # get network lines that intersect the buffers, for each mode of travel

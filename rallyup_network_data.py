@@ -152,7 +152,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             for insert_row in insert_row_values:
                 insert_cursor.insertRow(insert_row)
 
-        
+                
 # this function imports the user-defined utrans trails into the the netork dataset feature class 
 def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     # create list of field names
