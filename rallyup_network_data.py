@@ -20,6 +20,7 @@ utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.s
 utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails'
 fifty_sites_1mile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_1mile'
 fifty_sites_halfmile = 'D:\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_halfmile'
+counties_mmp = r'D:\MultimodalNetwork\MultimodalScriptData.gdb\Counties_MMP'
 fgdb_dataset_name = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset'
 bike_ped_auto = 'D:\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
 
@@ -43,7 +44,7 @@ def main():
     #print bike_ped_auto_fields
 
     ## -either- import roads data into network dataset by using spatial query ##
-    utrans_centerlines_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_roads, "Roads")
+    utrans_centerlines_for_network = get_SouceDataUsingSpatialQuery(counties_mmp, utrans_roads, "Roads")
     ## -or- import roads data into network dataset by using definition query ##
     #where_clause_roads = r"ZIPCODE_L = '84047' or ZIPCODE_R = '84047'"
     #utrans_centerlines_for_network = get_SourceDataUsingDefQuery(where_clause_roads, utrans_roads, "Roads")
@@ -51,7 +52,7 @@ def main():
     import_RoadsIntoNetworkDataset(utrans_centerlines_for_network)
 
     ## -either- import trails data into network dataset by using spatial query ##
-    utrans_trails_for_network = get_SouceDataUsingSpatialQuery(fifty_sites_1mile, utrans_trails, "Trails")
+    utrans_trails_for_network = get_SouceDataUsingSpatialQuery(counties_mmp, utrans_trails, "Trails")
     ## -or- import trails data into network dataset by using a definition query ##
     #where_clause_trails = r"Status = 'EXISTING' and TransNetwork = 'Yes'"
     #utrans_trails_for_network = get_SourceDataUsingDefQuery(where_clause_trails, utrans_trails, "Trails")
@@ -127,8 +128,10 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
 
             # transfer the speed value
             speed_lmt = utrans_row[2]
-
+            if speed_lmt == 0: # and cartocode is 11
+                speed_lmt = 25
             # calculate the time fields
+            
             drive_time = (miles / speed_lmt) * 60
             ped_time = (miles / 3.1) * 60
             bike_time = (miles / 9.6) * 60
