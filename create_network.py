@@ -21,8 +21,8 @@ try:
     
     #Set local variables
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "D:\\MultimodalNetwork\\MM_NetworkDataset_03292019.gdb\\NetworkDataset"
-    xml_template = "D:\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
+    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_05212020.gdb\\NetworkDataset"
+    xml_template = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
     
     #Create an XML template from the original network dataset
     ##arcpy.na.CreateTemplateFromNetworkDataset(original_network, xml_template)

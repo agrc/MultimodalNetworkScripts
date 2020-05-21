@@ -48,6 +48,7 @@ def main():
     ## -or- import roads data into network dataset by using definition query ##
     #where_clause_roads = r"ZIPCODE_L = '84047' or ZIPCODE_R = '84047'"
     #utrans_centerlines_for_network = get_SourceDataUsingDefQuery(where_clause_roads, utrans_roads, "Roads")
+    
     # import the roads into network dataset
     import_RoadsIntoNetworkDataset(utrans_centerlines_for_network)
 
