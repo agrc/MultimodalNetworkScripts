@@ -43,10 +43,10 @@ def main():
     #bike_ped_auto_fields = [f.name for f in arcpy.ListFields(bike_ped_auto)]
     #print bike_ped_auto_fields
 
-    ## -either- import roads data into network dataset by using spatial query ##
+    ##: -either- import roads data into network dataset by using spatial query ##
     utrans_centerlines_for_network = get_SouceDataUsingSpatialQuery(counties_mmp, utrans_roads, "Roads")
-    ## -or- import roads data into network dataset by using definition query ##
-    #where_clause_roads = r"ZIPCODE_L = '84047' or ZIPCODE_R = '84047'"
+    ##: -or- import roads data into network dataset by using definition query ##
+    #where_clause_roads = r"ZIPCODE_L = '84108' or ZIPCODE_R = '84108'"
     #utrans_centerlines_for_network = get_SourceDataUsingDefQuery(where_clause_roads, utrans_roads, "Roads")
     
     # import the roads into network dataset
@@ -83,10 +83,10 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
     
     # create list of field names
-    #                   0          1         2           3        4        5         6             7           8           9             10           11  
+    #                   0          1         2           3        4        5         6            7           8           9             10           11  
     road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'CARTOCODE', 'DOT_AADT', 'DOT_AADTYR', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'RoadClass', 'AADT', 'AADT_YR', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15         16         17
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'RoadClass', 'AADT', 'AADT_YR', 'BIKE_L', 'BIKE_R', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes (define two cursor on next line: search_cursor and insert_cursor)
     with arcpy.da.SearchCursor(utrans_roads_to_import, road_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -106,11 +106,12 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             bike_l = utrans_row[5]
             bike_r = utrans_row[6]
             cartocode = utrans_row[7]
-            bike_facilities = ['1','1A','1B','1C','2','2A','2B'] #only roads with bike lanes or cycle tracks are added to the bike network (no shared lanes)
-            #if HasFieldValue(bike_l) or HasFieldValue(bike_r) or cartocode == '11':
-            if bike_l in bike_facilities and bike_r in bike_facilities:
+            #bike_facilities = ['1','1A','1B','1C','2','2A','2B'] # only roads with bike lanes or cycle tracks are added to the bike network (no shared lanes)
+            #if bike_l in bike_facilities and bike_r in bike_facilities:
+            #    bike_network = 'Y'            
+            if HasFieldValue(bike_l) or HasFieldValue(bike_r):
                 bike_network = 'Y'
-            if cartocode == '11':
+            if cartocode not in ['1', '2', '4', '7']: #: also mark local roads as bike network for wider connectivity
                 bike_network = 'Y'
         
             # ped network (it is assumed that anything other than 'prohibited', ped is allowed)
@@ -118,7 +119,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             ped_l = utrans_row[3]
             ped_r = utrans_row[4]
             if HasFieldValue(ped_l) or HasFieldValue(ped_r):
-                if ped_l == 'Prohibited' or ped_r == 'Prohibited':
+                if ped_l == 'Restricted' or ped_r == 'Restricted':
                     ped_network = 'N'
 
             # convert meters to miles
@@ -136,11 +137,15 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
             speed_lmt = utrans_row[2]
             if speed_lmt == 0: # and cartocode is 11
                 speed_lmt = 25
+
             # calculate the time fields
-            
             drive_time = (miles / speed_lmt) * 60
             ped_time = (miles / 3.1) * 60
-            bike_time = (miles / 9.6) * 60
+            #: bike time - incentivize bike lanes and local roads. roads with bike facilities, pathways, and cartocode = 11 (local roads) get a 15% faster travel speed (cost of traversing is calculated at 11 mph instead of 9.6 mph)
+            if HasFieldValue(bike_l) or HasFieldValue(bike_r) or cartocode == '11':
+                bike_time = (miles / 11) * 60
+            else:
+                bike_time = (miles / 9.6) * 60
 
             # transfer the road class field over
             road_class = desc_lu[utrans_row[7]]
@@ -154,7 +159,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
 
 
             # create a list of values that will be used to construct new row
-            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, road_class, aadt, aadt_yr, utrans_row[11])]
+            insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, road_class, aadt, aadt_yr, bike_l, bike_r, utrans_row[11])]
             print insert_row_values
 
             # insert the new row with the list of values
@@ -210,7 +215,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
 
             # calculate the time fields
             ped_time = (miles / 3.1) * 60
-            bike_time = (miles / 9.6) * 60
+            bike_time = (miles / 11) * 60
 
             # create a list of values that will be used to construct new row
             insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[3])]
@@ -234,7 +239,7 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, utransFeatureClass, source)
 
     # make feature layer of utrans data (but, also use a where clause if it's trails dataset, to limit the segments to transportation trails only)
     if source == "Roads":
-        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"CARTOCODE not in (99, 15, 14)")
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"CARTOCODE not in (99, 13, 14, 15, 17, 18)")
     if source == "Trails":
         arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"Status = 'EXISTING' and TransNetwork = 'Yes'")
 
@@ -293,7 +298,7 @@ def HasFieldValue(field_value):
                 return True
         else:
             # it's not an int
-            if _str_field_value == "" or _str_field_value is None or _str_field_value.isspace():       
+            if _str_field_value == "" or _str_field_value is None or _str_field_value.isspace():
                 return False
             else:
                 return True
