@@ -169,6 +169,11 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                 
 # this function imports the user-defined utrans trails into the the netork dataset feature class 
 def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
+    
+    # convert features in trail dataset from multipart to singlepart
+    trails_singlepart = MultipartToSinglepart_management(utrans_trails_to_import, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\trails_singlepart' + '_' + strDate)
+    
+    
     # create list of field names
     #                    0                1                 2            3 
     trail_fields = ['PrimaryName', 'DesignatedUses', 'SHAPE@LENGTH', 'SHAPE@']
@@ -176,7 +181,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
-    with arcpy.da.SearchCursor(utrans_trails_to_import, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
+    with arcpy.da.SearchCursor(trails_singlepart, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
         # itterate though the intersected utrans road centerline features
         for utrans_row in search_cursor:
 
