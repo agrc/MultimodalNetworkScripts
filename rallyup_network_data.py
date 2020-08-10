@@ -6,6 +6,10 @@ from datetime import datetime
 
 #arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
 
+#: Notes before running: verify data sources (local SGID data vs SGID data -- home vpn vs at work). Variables to check:
+    # utrans_roads
+    # utrans_trails
+
 #### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
 transit_route_source = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
 
@@ -14,10 +18,13 @@ today = date.today()
 strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
+# utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
+# utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2020_07_27.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2020_07_27.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+
 network_file_geodatabase = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb'
 arcpy.env.workspace = network_file_geodatabase
-utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit'
-utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths'
 fifty_sites_1mile = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_1mile'
 fifty_sites_halfmile = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScriptData.gdb\FiftySites_halfmile'
 counties_mmp = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScriptData.gdb\Counties_MMP'
@@ -239,7 +246,7 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, utransFeatureClass, source)
 
     # make feature layer of utrans data (but, also use a where clause if it's trails dataset, to limit the segments to transportation trails only)
     if source == "Roads":
-        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"CARTOCODE not in (99, 13, 14, 15, 17, 18)")
+        arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"CARTOCODE not in ('99', '13', '14', '15', '17', '18')")
     if source == "Trails":
         arcpy.MakeFeatureLayer_management(utransFeatureClass, 'utransIntersected_lyr', r"Status = 'EXISTING' and TransNetwork = 'Yes'")
 

@@ -21,7 +21,7 @@ try:
     
     #Set local variables
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_07232020.gdb\\NetworkDataset"
+    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_07272020.gdb\\NetworkDataset"
     xml_template = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
     
     #Create an XML template from the original network dataset
