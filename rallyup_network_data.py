@@ -21,8 +21,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 # utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2020_07_27.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2020_07_27.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_01_07.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_01_07.gdb\\TrailsAndPathways' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb'
 arcpy.env.workspace = network_file_geodatabase
@@ -87,7 +87,8 @@ def main():
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     # get # Get the dictionary of codes and descriptions for cartocode field, for transfering descriptions to RoadClass network field
-    gdb = r'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde'
+    #gdb = r'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde'
+    gdb = r'Database Connections\internal@SGID@internal.agrc.utah.gov.sde'
     desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
     
     # create list of field names
@@ -186,8 +187,8 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     trails_singlepart = arcpy.MultipartToSinglepart_management(utrans_trails_to_import, output)
     
     # create list of field names
-    #                    0                1               2             3            4
-    trail_fields = ['PrimaryName', 'DesignatedUses', 'CartoCode', 'SHAPE@LENGTH', 'SHAPE@']
+    #                    0                1               2          3            4            5
+    trail_fields = ['PrimaryName', 'DesignatedUses', 'CartoCode', 'Status', 'SHAPE@LENGTH', 'SHAPE@']
     #                   0           1             2          3           4          5              6              7            8              9             10                11            12
     network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
 
@@ -207,7 +208,8 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
             #: only bring in segments with specific cartocode
             if HasFieldValue(utrans_row[2]):
                 cartocode = utrans_row[2]
-                if cartocode in ('3 - Paved Shared Use','8 - Bridge, Tunnel','9 - Link'):
+                status_code = utrans_row[3]
+                if cartocode in ('3 - Paved Shared Use','8 - Bridge, Tunnel','9 - Link') and status_code == 'EXISTING':
 
                     #: populate bike and ped network values
                     designated_use = ''
@@ -231,7 +233,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
                         ped_network = 'U'
 
                     # convert meters to miles
-                    miles = utrans_row[3] * 0.000621371
+                    miles = utrans_row[4] * 0.000621371
                     miles = round(miles, 10)
 
                     # calculate the time fields
@@ -239,7 +241,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
                     bike_time = (miles / 11) * 60
 
                     # create a list of values that will be used to construct new row
-                    insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[4])]
+                    insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[5])]
                     print insert_row_values
 
                     # insert the new row with the list of values

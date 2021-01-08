@@ -4,7 +4,7 @@ import time
 from datetime import date
 from datetime import datetime
 
-#### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
+#### User Note ####: change dates (only if you didn't run rallyup_network_data.py on the same day) for fgdb to current dataset (ctrl + f for "#### Note ####:")
 
 #arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
 
