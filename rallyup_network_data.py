@@ -356,7 +356,7 @@ def importTransitData():
     # add a field in the route fc to hold the number of stops
     arcpy.AddField_management(transit_routes_network_dataset, "RouteType", "TEXT", field_length=15)
     # buffer sgid commuter rail layer and then select by location to find the transit routes that have their center in this buffer - then assing those selected routes a RouteType of 'CommmuterRail'
-    sgid_commuter_rail = r'Database Connections\DC_agrc@SGID10@sgid.agrc.utah.gov.sde\SGID10.TRANSPORTATION.CommuterRailRoutes_UTA'
+    sgid_commuter_rail = r'Database Connections\internal@SGID@internal.agrc.utah.gov.sde\SGID.TRANSPORTATION.CommuterRailRoutes_UTA'
     # buffer the comm rail
     sgid_commuter_rail_buff = r"C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\SGID_CommRailBuff_" + strDate
     arcpy.Buffer_analysis(sgid_commuter_rail, sgid_commuter_rail_buff, 30)
