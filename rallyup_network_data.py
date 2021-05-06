@@ -21,8 +21,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 # utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_01_07.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_01_07.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_05_06.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_05_06.gdb\\TrailsAndPathways' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb'
 arcpy.env.workspace = network_file_geodatabase
