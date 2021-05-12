@@ -18,8 +18,8 @@ arcpy.env.workspace = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork
 
 #: Set local variables
 trails_paths = "TrailsAndPathways"
-trails_paths_split = "TrailsAndPathways_split_at_intersections"
-dup_uniqueid_table = "duplicate_uniqueids"
+trails_paths_split = "TrailsAndPathways_split_at_intersections2"
+dup_uniqueid_table = "duplicate_uniqueids2"
 
 #: Make feature layer with where clause
 arcpy.MakeFeatureLayer_management(trails_paths, "trails_paths_lyr", "CartoCode <> '8 - Bridge, Tunnel'")
@@ -46,7 +46,7 @@ joined_fc = arcpy.management.JoinField(finished_product, "OBJECTID", unique_dup_
 
 #: Make feature layer where IN_FID is not null and then calculate UniqueID values to null where this is true
 arcpy.MakeFeatureLayer_management(joined_fc, "joined_fc_lyr", "IN_FID is not NULL")
-arcpy.management.CalculateField("joined_fc_lyr", "Unique_ID", "0")
+arcpy.management.CalculateField("joined_fc_lyr", "Unique_ID", "None", "PYTHON3", '', "TEXT")
 
 #: Remove the join fields
 arcpy.DeleteField_management(finished_product, ["IN_FID", "FEAT_SEQ"])
