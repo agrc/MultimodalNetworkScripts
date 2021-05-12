@@ -28,21 +28,21 @@ ped_lines_in_buffer = ""
 def main():
     ### i'm doing this rallyup data script in the impprt transit data function b/c i need the stop counts for route times
     #### explode transit stops to single points (currently they are mulitpoints)
-    ###print "explode multipoint stops to single points"
+    ###print("explode multipoint stops to single points")
     ###transit_stops_singlepoints = "C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate
     ###arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")
 
     # create a buffer around the transit stops
-    print "buffer the transit stops single points"
+    print("buffer the transit stops single points")
     transit_stops_buffered = r"C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBuff_" + strDate
     arcpy.Buffer_analysis(transit_stops_singlepoints, transit_stops_buffered, 100)
 
     # get network lines that intersect the buffers, for each mode of travel
-    print "intersect the bike network with the buffers"
+    print("intersect the bike network with the buffers")
     intersected_bike_network = get_SouceDataUsingSpatialQuery(transit_stops_buffered, bike_ped_auto, "Bike") 
-    print "intersect the auto network with the buffers"
+    print("intersect the auto network with the buffers")
     intersected_auto_network = get_SouceDataUsingSpatialQuery(transit_stops_buffered, bike_ped_auto, "Auto") 
-    print "intersect the ped network with the buffers"
+    print("intersect the ped network with the buffers")
     intersected_ped_network = get_SouceDataUsingSpatialQuery(transit_stops_buffered, bike_ped_auto, "Ped") 
     intersected_bike_network = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBike' + '_' + strDate
     intersected_auto_network = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopAuto' + '_' + strDate
@@ -50,36 +50,36 @@ def main():
 
     # convert the network line data (for each of the 3 modes) to vertices 
     outputVertsToPnts = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\Verts'
-    print "convert the intersected bike verts to points layer" 
+    print("convert the intersected bike verts to points layer")
     intersected_bike_network_verts = arcpy.FeatureVerticesToPoints_management(intersected_bike_network, outputVertsToPnts + 'Bike' + '_' + strDate, "ALL")
-    print "convert the intersected auto verts to points layer" 
+    print("convert the intersected auto verts to points layer")
     intersected_auto_network_verts = arcpy.FeatureVerticesToPoints_management(intersected_auto_network, outputVertsToPnts + 'Auto' + '_' + strDate, "ALL")
-    print "convert the intersected ped verts to points layer" 
+    print("convert the intersected ped verts to points layer")
     intersected_ped_network_verts = arcpy.FeatureVerticesToPoints_management(intersected_ped_network, outputVertsToPnts + 'Ped' + '_' + strDate, "ALL")
 
     # add a field to each of the vert point feature classes (for each of the 3 modes)
-    #print "add NEAR_FID field to transit stops"
+    #print("add NEAR_FID field to transit stops")
     #arcpy.AddField_management(transit_stops_singlepoints, "NEAR_FID", "LONG")
-    print "add NEAR_FID field to bike vert pnts layer" 
+    print("add NEAR_FID field to bike vert pnts layer")
     arcpy.AddField_management(intersected_bike_network_verts, "NEAR_FID", "LONG")
-    print "add NEAR_FID field to auto vert pnts layer" 
+    print("add NEAR_FID field to auto vert pnts layer")
     arcpy.AddField_management(intersected_auto_network_verts, "NEAR_FID", "LONG")
-    print "add NEAR_FID field to ped vert pnts layer" 
+    print("add NEAR_FID field to ped vert pnts layer")
     arcpy.AddField_management(intersected_ped_network_verts, "NEAR_FID", "LONG")
 
     # calculate the OID field values to the NEAR_FID fields
-    #print "calc OID values to the NEAR_FID field for bike vert pnts"
+    #print("calc OID values to the NEAR_FID field for bike vert pnts"
     #arcpy.CalculateField_management(transit_stops_singlepoints, field="NEAR_FID", expression="!OBJECTID!", expression_type="PYTHON", code_block="")
-    print "calc OID values to the NEAR_FID field for bike vert pnts"
+    print("calc OID values to the NEAR_FID field for bike vert pnts")
     arcpy.CalculateField_management(intersected_bike_network_verts, field="NEAR_FID", expression="!OBJECTID!", expression_type="PYTHON", code_block="")
-    print "calc OID values to the NEAR_FID field for auto vert pnts"
+    print("calc OID values to the NEAR_FID field for auto vert pnts")
     arcpy.CalculateField_management(intersected_auto_network_verts, field="NEAR_FID", expression="!OBJECTID!", expression_type="PYTHON", code_block="")
-    print "calc OID values to the NEAR_FID field for ped vert pnts"
+    print("calc OID values to the NEAR_FID field for ped vert pnts")
     arcpy.CalculateField_management(intersected_ped_network_verts, field="NEAR_FID", expression="!OBJECTID!", expression_type="PYTHON", code_block="")
 
 
     # create three seperate feature classs from the transit stop points - so each one can be used separatly in the near analysis and preserve the near data in the fields 
-    print "create a separate feature class of transit stops for each near analysis"
+    print("create a separate feature class of transit stops for each near analysis")
     arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearBike_' + strDate)
     arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearAuto_' + strDate)
     arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearPed_' + strDate)
@@ -88,79 +88,79 @@ def main():
     stops_near_ped = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\StopNearPed_' + strDate
 
     # run near analysis on the transit stops to see the nearest bike/auto/ped vertex
-    print "run near analysis on bike"
+    print("run near analysis on bike")
     arcpy.Near_analysis(stops_near_bike, intersected_bike_network_verts, search_radius="200 Meters", location="LOCATION", angle="NO_ANGLE", method="PLANAR")
-    print "run near analysis on auto"
+    print("run near analysis on auto")
     arcpy.Near_analysis(stops_near_auto, intersected_auto_network_verts, search_radius="200 Meters", location="LOCATION", angle="NO_ANGLE", method="PLANAR")
-    print "run near analysis on ped"
+    print("run near analysis on ped")
     arcpy.Near_analysis(stops_near_ped, intersected_ped_network_verts, search_radius="200 Meters", location="LOCATION", angle="NO_ANGLE", method="PLANAR")
 
 
     # append the near verts into the transit stop data, but only append the verts that found a nearby 
     #arcpy.Append_management(inputs="StopNearBike_02192019", target="VertsBike_02192019", schema_type="NO_TEST", field_mapping="""Name "Name" true true false 50 Text 0 0 ,First,#;Oneway "Oneway" true true false 2 Text 0 0 ,First,#;Speed "Speed" true true false 2 Short 0 0 ,First,#;AutoNetwork "AutoNetwork" true true false 1 Text 0 0 ,First,#;BikeNetwork "BikeNetwork" true true false 1 Text 0 0 ,First,#;PedNetwork "PedNetwork" true true false 1 Text 0 0 ,First,#;SourceData "SourceData" true true false 15 Text 0 0 ,First,#;DriveTime "DriveTime" true true false 8 Double 0 0 ,First,#;BikeTime "BikeTime" true true false 8 Double 0 0 ,First,#;PedestrianTime "PedestrianTime" true true false 8 Double 0 0 ,First,#;Length_Miles "Length_Miles" true true false 8 Double 0 0 ,First,#;ORIG_FID "ORIG_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,ORIG_FID,-1,-1;NEAR_FID "NEAR_FID" true true false 4 Long 0 0 ,First,#,StopNearBike_02192019,NEAR_FID,-1,-1""", subtype="")
-    print "append the bike data"
+    print("append the bike data")
     arcpy.Append_management(stops_near_bike, intersected_bike_network_verts, schema_type="NO_TEST")
-    print "append the auto data"
+    print("append the auto data")
     arcpy.Append_management(stops_near_auto, intersected_auto_network_verts, schema_type="NO_TEST")
-    print "append the ped data"
+    print("append the ped data")
     arcpy.Append_management(stops_near_ped, intersected_ped_network_verts, schema_type="NO_TEST")
 
     ## remove the -1 from the NEAR_FID field, before creating the connector lines - by way of making a new feture class
-    print "remove -1 values from bike"
+    print("remove -1 values from bike")
     arcpy.FeatureClassToFeatureClass_conversion(intersected_bike_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsBike_' + strDate, "NEAR_FID <> -1")
-    print "remove -1 values from auto"
+    print("remove -1 values from auto")
     arcpy.FeatureClassToFeatureClass_conversion(intersected_auto_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsAuto_' + strDate, "NEAR_FID <> -1")
-    print "remove -1 values from auto"
+    print("remove -1 values from auto")
     arcpy.FeatureClassToFeatureClass_conversion(intersected_ped_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsPed_' + strDate, "NEAR_FID <> -1")
     conn_pnts_bike = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsBike_' + strDate
     conn_pnts_auto = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsAuto_' + strDate
     conn_pnts_ped = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsPed_' + strDate
 
     # create lines between the verts
-    print "create the connector lines for bike"
+    print("create the connector lines for bike")
     bike_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\BikeConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_bike, bike_connectors, "NEAR_FID","NEAR_FID", "NO_CLOSE")
 
-    print "create the connector lines for auto"
+    print("create the connector lines for auto")
     auto_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\AutoConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_auto, auto_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
-    print "create the connector lines for ped"
+    print("create the connector lines for ped")
     ped_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\PedConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_ped, ped_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     # remove the identical connectors in each feature class
-    print "delete identical connector lines for bike"
+    print("delete identical connector lines for bike")
     arcpy.DeleteIdentical_management(bike_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")
-    print "delete identical connector lines for auto"
+    print("delete identical connector lines for auto")
     arcpy.DeleteIdentical_management(auto_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")  
-    print "delete identical connector lines for ped"       
+    print("delete identical connector lines for ped")
     arcpy.DeleteIdentical_management(ped_connectors, fields="Shape", xy_tolerance="", z_tolerance="0")
 
     # call the function to add and calc network fields on the connectors
-    print "add fields and calc values for the bike connector data"
+    print("add fields and calc values for the bike connector data")
     addAndCalcNetworkFields(bike_connectors, "Bike")
-    print "add fields and calc values for the auto connector data"
+    print("add fields and calc values for the auto connector data")
     addAndCalcNetworkFields(auto_connectors, "Auto")
-    print "add fields and calc values for the ped connector data"
+    print("add fields and calc values for the ped connector data")
     addAndCalcNetworkFields(ped_connectors, "Ped")
 
     # append the connector data to the BikePedAuto feature class
-    print "append the bike connectors into the BikePedAuto feature class"
+    print("append the bike connectors into the BikePedAuto feature class")
     arcpy.Append_management(bike_connectors, bike_ped_auto, schema_type="NO_TEST")
-    print "append the auto connectors into the BikePedAuto feature class"
+    print("append the auto connectors into the BikePedAuto feature class")
     arcpy.Append_management(auto_connectors, bike_ped_auto, schema_type="NO_TEST")
-    print "append the ped connectors into the BikePedAuto feature class"
+    print("append the ped connectors into the BikePedAuto feature class")
     arcpy.Append_management(ped_connectors, bike_ped_auto, schema_type="NO_TEST")
 
 
     # import the transit routes and transit tops into the netork dataset
-    ###print "import transit stops"
+    ###print("import transit stops")
     ###arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
     #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitRoutes')
 
     # pull out the connectors (that we just appended) from the BikePedAuto to a separate feature class
-    print "creating separate connector network feature class"
+    print("creating separate connector network feature class")
     arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, network_dataset, 'ConnectorNetwork', "ConnectorNetwork = 'Y'")
 
     ### delete the connectors from the BikePedAuto feature class --- use this option if we're going the route of having the connector lines in their own connectivity group (which we currently are doing)
@@ -170,7 +170,7 @@ def main():
             uCur.deleteRow()
 
 
-    print "create_connectors.py script is done!"
+    print("create_connectors.py script is done!")
 
 # this function returns either network line data that intersects the transit stop buffers 
 def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source):
