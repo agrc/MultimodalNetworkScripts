@@ -73,18 +73,18 @@ def main():
     import_TrailsIntoNetworkDataset(utrans_trails_for_network)
 
     # import transit route data (the transit stops get added in the create_connectors.py file, after they've been exploded to single part)
-    print "import the transit routes"
+    print("import the transit routes")
     importTransitData()
 
     # export out each transit group (from BikePedAuto) to a separate feature class in the network dataset
-    print "creating separate bike network feature class"
+    print("creating separate bike network feature class")
     arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'BikeNetwork', "BikeNetwork = 'Y'")
-    print "creating separate ped network feature class"
+    print("creating separate ped network feature class")
     arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'PedNetwork', "PedNetwork = 'Y'")
-    print "creating separate auto network feature class"
+    print("creating separate auto network feature class")
     arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'AutoNetwork', "AutoNetwork = 'Y'")
 
-    print "rallyup_network_data.py script is done!"
+    print("rallyup_network_data.py script is done!")
 
 
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
@@ -178,7 +178,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
 
                 # create a list of values that will be used to construct new row
                 insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, aadt, aadt_yr, bike_l, bike_r, vertlevel, utrans_row[12])]
-                print insert_row_values
+                print(insert_row_values)
 
                 # insert the new row with the list of values
                 for insert_row in insert_row_values:
@@ -252,7 +252,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
 
                     # create a list of values that will be used to construct new row
                     insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, utrans_row[5])]
-                    print insert_row_values
+                    print(insert_row_values)
 
                     # insert the new row with the list of values
                     for insert_row in insert_row_values:
@@ -341,10 +341,10 @@ def importTransitData():
     # import transit stops
     transit_stops_multipoint = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset  
     # explode transit stops to single points (currently they are mulitpoints)
-    print "explode multipoint stops to single points"
+    print("explode multipoint stops to single points")
     transit_stops_singlepoints = "C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate
     arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")       
-    print "import transit stops"
+    print("import transit stops")
     arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
 
 
