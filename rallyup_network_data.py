@@ -9,7 +9,10 @@ from datetime import datetime
 #: Notes before running: verify data sources (local SGID data vs SGID data -- home vpn vs at work). Variables to check:
     # utrans_roads
     # utrans_trails
-    # also, you need to be on the state network (VPN) to get the domain codes (line 91) 
+    # also, you need to be on the state network (VPN) to get the domain codes (line 91)
+    
+    ##: while testing interop stuff:
+    #: make sure this is pointing to the correct area: \MultimodalScriptData.gdb\BikePedAuto_template_new
 
 #### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
 transit_route_source = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
