@@ -21,8 +21,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 # utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_05_06.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_05_06.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_04_09.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_04_09.gdb\\TrailsAndPathways' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb'
 arcpy.env.workspace = network_file_geodatabase
@@ -44,7 +44,7 @@ def main():
 
     # create new feature class in the fgdb
     arcpy.CreateFeatureclass_management(fgdb_dataset_name, "BikePedAuto", "POLYLINE", 
-                                        'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScriptData.gdb\BikePedAuto_template', "DISABLED", "DISABLED", 
+                                        'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScriptData.gdb\BikePedAuto_template_new', "DISABLED", "DISABLED", 
                                         utrans_roads)
 
     # create a list of fields for the BikePedAuto feature class 
@@ -92,10 +92,10 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
     
     # create list of field names
-    #                   0          1         2           3        4        5         6            7           8           9             10           11  
-    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'CARTOCODE', 'DOT_AADT', 'DOT_AADTYR', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15         16         17
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'RoadClass', 'AADT', 'AADT_YR', 'BIKE_L', 'BIKE_R', 'SHAPE@']
+    #                   0          1         2           3        4        5         6            7           8           9             10           11            12  
+    road_fields = ['FULLNAME', 'ONEWAY', 'SPEED_LMT', 'PED_L', 'PED_R', 'BIKE_L', 'BIKE_R', 'CARTOCODE', 'DOT_AADT', 'DOT_AADTYR', 'VERT_LEVEL', 'SHAPE@LENGTH', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10              11                 12        13       14        15         16         17           18
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'CartoCode', 'AADT', 'AADT_YR', 'BIKE_L', 'BIKE_R', 'VERT_LEVEL', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes (define two cursor on next line: search_cursor and insert_cursor)
     with arcpy.da.SearchCursor(utrans_roads_to_import, road_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -109,7 +109,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                 source_data = 'RoadCenterlines'
                 auto_network = 'Y'
                 connector_network = 'N'
-                road_class = ''
+                carto_code = ''
                 aadt = 0
                 aadt_yr = ''
 
@@ -135,7 +135,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                         ped_network = 'N'
 
                 # convert meters to miles
-                miles = utrans_row[10] * 0.000621371
+                miles = utrans_row[11] * 0.000621371
                 miles = round(miles, 10)
                 oneway = ''
                 if utrans_row[1] == '0':
@@ -159,8 +159,8 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                 else:
                     bike_time = (miles / 9.6) * 60
 
-                # transfer the road class field over
-                road_class = desc_lu[utrans_row[7]]
+                # transfer the cartocode field over
+                carto_code = desc_lu[utrans_row[7]]
 
                 # transfer the AADT values over
                 if utrans_row[8] is not None:
@@ -169,9 +169,12 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                 # transfer the AADT year over
                 aadt_yr = utrans_row[9]
 
+                # transfer the VERT_LEVEL
+                if utrans_row[10] is not None:
+                    vertlevel = utrans_row[10]
 
                 # create a list of values that will be used to construct new row
-                insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, road_class, aadt, aadt_yr, bike_l, bike_r, utrans_row[11])]
+                insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, aadt, aadt_yr, bike_l, bike_r, vertlevel, utrans_row[12])]
                 print insert_row_values
 
                 # insert the new row with the list of values
@@ -189,8 +192,8 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     # create list of field names
     #                    0                1               2          3            4            5
     trail_fields = ['PrimaryName', 'DesignatedUses', 'CartoCode', 'Status', 'SHAPE@LENGTH', 'SHAPE@']
-    #                   0           1             2          3           4          5              6              7            8              9             10                11            12
-    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'SHAPE@']
+    #                   0           1             2          3           4          5              6              7            8              9             10                11            12           13
+    network_fields = ['Name', 'Length_Miles', 'Oneway', 'SourceData', 'Speed', 'DriveTime', 'PedestrianTime', 'BikeTime', 'AutoNetwork', 'PedNetwork', 'BikeNetwork', 'ConnectorNetwork', 'CartoCode', 'SHAPE@']
 
     # set up search cursors to select and insert data between feature classes
     with arcpy.da.SearchCursor(trails_singlepart, trail_fields) as search_cursor, arcpy.da.InsertCursor(bike_ped_auto, network_fields) as insert_cursor:
@@ -204,6 +207,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
             drive_time = None
             speed_lmt = None
             oneway = ''
+            carto_code = ''
 
             #: only bring in segments with specific cartocode
             if HasFieldValue(utrans_row[2]):
@@ -240,8 +244,11 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
                     ped_time = (miles / 3.1) * 60
                     bike_time = (miles / 11) * 60
 
+                    # transfer the cartocode field over
+                    carto_code = utrans_row[2]
+
                     # create a list of values that will be used to construct new row
-                    insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, utrans_row[5])]
+                    insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, utrans_row[5])]
                     print insert_row_values
 
                     # insert the new row with the list of values
@@ -302,7 +309,7 @@ def get_SourceDataUsingDefQuery(where_clause, utransFeatureClass, source):
 
     return 'utransQueried_lyr'
 
-    
+ 
 # this function checks if the field value has a valid value (that's it's not just an empty string or null value)
 def HasFieldValue(field_value):
     """ example: (row.STATUS) """
