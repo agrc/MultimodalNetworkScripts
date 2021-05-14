@@ -1,7 +1,28 @@
 import arcpy
 
-# select all segments in the network ('BikePedAuto') where:
-    # "SourceData = 'Trails' and class <> '8 - Bridge, Tunnel' AND SourceData = 'RoadCenterlines' and VertLevel = ?"
+def split_network_at_intersections(bike_ped_auto, strDate):
 
-#: set local variables
-new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_12042020.gdb\\NetworkDataset"
+    bike_ped_auto_split = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\BikePedAutoSplit_" + strDate
+
+    #: Make feature layer with where clause
+    arcpy.MakeFeatureLayer_management(bike_ped_auto, "bike_ped_auto_lyr", "(SourceData = 'Trails' and class <> '8 - Bridge, Tunnel') OR (SourceData = 'RoadCenterlines' and VertLevel not in ('1','2','3'))")
+
+    #: Use FeatureToLine function to combine features into single feature class
+    print("begin feature-to-line")
+    finished_product = arcpy.FeatureToLine_management("bike_ped_auto_lyr", bike_ped_auto_split, "0.001 Meters", "ATTRIBUTES")
+
+    #: Delete the newly-created FID_BikePedAuto field (this will keep the schema the same and also allow the append below w/o "NO_TEST")
+    arcpy.DeleteField_management(finished_product, ["FID_BikePedAuto"])
+
+    #: Append the segments that did not get split back into the dataset
+    arcpy.MakeFeatureLayer_management(bike_ped_auto, "bike_ped_auto_not_split_lyr", "(SourceData = 'Trails' and class = '8 - Bridge, Tunnel') OR (SourceData = 'RoadCenterlines' and VertLevel in ('1','2','3'))")
+    print("begin appending segments that were not split")
+    arcpy.management.Append("bike_ped_auto_not_split_lyr", finished_product)
+
+    #: Truncate the BikePedAuto and append this new layer
+
+
+#: run this script as a stand alone
+bike_ped_auto = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_05132021.gdb\\NetworkDataset\\BikePedAuto"
+strDate = "05132021"
+split_network_at_intersections(bike_ped_auto, strDate)
