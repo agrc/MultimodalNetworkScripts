@@ -106,7 +106,7 @@ def main():
     #arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'AutoNetwork', "AutoNetwork = 'Y'")
 
     #: Export the BikePedAuto to shapefile
-
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork', 'BikePedAuto_' + strDate + '.shp')
 
     print("create_network_data.py script is done!")
 
