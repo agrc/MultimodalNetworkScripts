@@ -6,19 +6,19 @@ from datetime import datetime
 
 #### User Note ####: change dates (only if you didn't run rallyup_network_data.py on the same day) for fgdb to current dataset (ctrl + f for "#### Note ####:")
 
-#arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
+#arcpy.env.workspace = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork'
 
 # get the date
 today = date.today()
 strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
-#bike_ped_auto = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate + '.gdb\NetworkDataset' + '\BikePedAuto'
-network_dataset = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
-bike_ped_auto = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_' + strDate +  '.gdb\NetworkDataset\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
-### i'm doing this in the rallup script now...  transit_stops_multipoint = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset     
-transit_routes = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change dates (if it's been updated) for fgdb to current dataset
-transit_stops_singlepoints = r"C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate #### Note ####: change today's dates if rallyup script was not run today
+#bike_ped_auto = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb\\NetworkDataset' + '\\BikePedAuto'
+network_dataset = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate +  '.gdb\\NetworkDataset'  #### Note ####: change dates for fgdb to current dataset
+bike_ped_auto = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate +  '.gdb\\NetworkDataset\\BikePedAuto' #### Note ####: change dates for fgdb to current dataset
+### i'm doing this in the rallup script now...  transit_stops_multipoint = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_TransitData_02152019.gdb\\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset     
+transit_routes = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_TransitData_02152019.gdb\\TransitRoutes' #### Note ####: change dates (if it's been updated) for fgdb to current dataset
+transit_stops_singlepoints = r"C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStops_" + strDate #### Note ####: change today's dates if rallyup script was not run today
 transit_stops_buffered = ""
 auto_lines_in_buffer = ""
 bike_lines_in_buffer = ""
@@ -29,12 +29,12 @@ def main():
     ### i'm doing this rallyup data script in the impprt transit data function b/c i need the stop counts for route times
     #### explode transit stops to single points (currently they are mulitpoints)
     ###print("explode multipoint stops to single points")
-    ###transit_stops_singlepoints = "C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStops_" + strDate
+    ###transit_stops_singlepoints = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStops_" + strDate
     ###arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")
 
     # create a buffer around the transit stops
     print("buffer the transit stops single points")
-    transit_stops_buffered = r"C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBuff_" + strDate
+    transit_stops_buffered = r"C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStopBuff_" + strDate
     arcpy.Buffer_analysis(transit_stops_singlepoints, transit_stops_buffered, 100)
 
     # get network lines that intersect the buffers, for each mode of travel
@@ -44,12 +44,12 @@ def main():
     intersected_auto_network = get_SouceDataUsingSpatialQuery(transit_stops_buffered, bike_ped_auto, "Auto") 
     print("intersect the ped network with the buffers")
     intersected_ped_network = get_SouceDataUsingSpatialQuery(transit_stops_buffered, bike_ped_auto, "Ped") 
-    intersected_bike_network = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopBike' + '_' + strDate
-    intersected_auto_network = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopAuto' + '_' + strDate
-    intersected_ped_network = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStopPed' + '_' + strDate
+    intersected_bike_network = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStopBike' + '_' + strDate
+    intersected_auto_network = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStopAuto' + '_' + strDate
+    intersected_ped_network = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStopPed' + '_' + strDate
 
     # convert the network line data (for each of the 3 modes) to vertices 
-    outputVertsToPnts = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\Verts'
+    outputVertsToPnts = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\Verts'
     print("convert the intersected bike verts to points layer")
     intersected_bike_network_verts = arcpy.FeatureVerticesToPoints_management(intersected_bike_network, outputVertsToPnts + 'Bike' + '_' + strDate, "ALL")
     print("convert the intersected auto verts to points layer")
@@ -80,12 +80,12 @@ def main():
 
     # create three seperate feature classs from the transit stop points - so each one can be used separatly in the near analysis and preserve the near data in the fields 
     print("create a separate feature class of transit stops for each near analysis")
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearBike_' + strDate)
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearAuto_' + strDate)
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'StopNearPed_' + strDate)
-    stops_near_bike = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\StopNearBike_' + strDate
-    stops_near_auto = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\StopNearAuto_' + strDate
-    stops_near_ped = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\StopNearPed_' + strDate
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'StopNearBike_' + strDate)
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'StopNearAuto_' + strDate)
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'StopNearPed_' + strDate)
+    stops_near_bike = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\StopNearBike_' + strDate
+    stops_near_auto = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\StopNearAuto_' + strDate
+    stops_near_ped = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\StopNearPed_' + strDate
 
     # run near analysis on the transit stops to see the nearest bike/auto/ped vertex
     print("run near analysis on bike")
@@ -107,26 +107,26 @@ def main():
 
     ## remove the -1 from the NEAR_FID field, before creating the connector lines - by way of making a new feture class
     print("remove -1 values from bike")
-    arcpy.FeatureClassToFeatureClass_conversion(intersected_bike_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsBike_' + strDate, "NEAR_FID <> -1")
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_bike_network_verts, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'ConnPntsBike_' + strDate, "NEAR_FID <> -1")
     print("remove -1 values from auto")
-    arcpy.FeatureClassToFeatureClass_conversion(intersected_auto_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsAuto_' + strDate, "NEAR_FID <> -1")
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_auto_network_verts, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'ConnPntsAuto_' + strDate, "NEAR_FID <> -1")
     print("remove -1 values from auto")
-    arcpy.FeatureClassToFeatureClass_conversion(intersected_ped_network_verts, 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb', 'ConnPntsPed_' + strDate, "NEAR_FID <> -1")
-    conn_pnts_bike = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsBike_' + strDate
-    conn_pnts_auto = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsAuto_' + strDate
-    conn_pnts_ped = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\ConnPntsPed_' + strDate
+    arcpy.FeatureClassToFeatureClass_conversion(intersected_ped_network_verts, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb', 'ConnPntsPed_' + strDate, "NEAR_FID <> -1")
+    conn_pnts_bike = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\ConnPntsBike_' + strDate
+    conn_pnts_auto = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\ConnPntsAuto_' + strDate
+    conn_pnts_ped = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\ConnPntsPed_' + strDate
 
     # create lines between the verts
     print("create the connector lines for bike")
-    bike_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\BikeConn_' + strDate
+    bike_connectors = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\BikeConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_bike, bike_connectors, "NEAR_FID","NEAR_FID", "NO_CLOSE")
 
     print("create the connector lines for auto")
-    auto_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\AutoConn_' + strDate
+    auto_connectors = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\AutoConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_auto, auto_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     print("create the connector lines for ped")
-    ped_connectors = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\PedConn_' + strDate
+    ped_connectors = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\PedConn_' + strDate
     arcpy.PointsToLine_management(conn_pnts_ped, ped_connectors, Line_Field="NEAR_FID", Sort_Field="NEAR_FID", Close_Line="NO_CLOSE")
 
     # remove the identical connectors in each feature class
@@ -156,8 +156,8 @@ def main():
 
     # import the transit routes and transit tops into the netork dataset
     ###print("import transit stops")
-    ###arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_03192019.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
-    #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_NetworkDataset_02202019.gdb\NetworkDataset', 'TransitRoutes')
+    ###arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_03192019.gdb\\NetworkDataset', 'TransitStops') #### Note ####: change dates for fgdb to current dataset
+    #arcpy.FeatureClassToFeatureClass_conversion(transit_routes, r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_02202019.gdb\\NetworkDataset', 'TransitRoutes')
 
     # pull out the connectors (that we just appended) from the BikePedAuto to a separate feature class
     print("creating separate connector network feature class")
@@ -199,7 +199,7 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, networkFeatureClass, source
     if matchcount == 0:
         print('no features matched spatial and attribute criteria')
     else:
-        intersected_roads = arcpy.CopyFeatures_management('linesIntersected_lyr', 'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MultimodalScratchData.gdb\TranStop' + source + '_' + strDate)
+        intersected_roads = arcpy.CopyFeatures_management('linesIntersected_lyr', 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStop' + source + '_' + strDate)
         #print('{0} cities that matched criteria written to {0}'.format(matchcount, utrans_IntersectedRoads))
 
     return 'linesIntersected_lyr'
