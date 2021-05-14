@@ -18,7 +18,7 @@ arcpy.env.workspace = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork
 
 #: Set local variables
 trails_paths = "TrailsAndPathways"
-trails_paths_split = "TrailsAndPathways_split_at_intersections2"
+trails_paths_split = "TrailsAndPathways_split_at_intersections"
 dup_uniqueid_table = "duplicate_uniqueids2"
 
 #: Make feature layer with where clause
