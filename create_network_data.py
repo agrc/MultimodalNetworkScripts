@@ -3,8 +3,12 @@ import datetime
 import time
 from datetime import date
 from datetime import datetime
-from split_network_segments_at_intersections import *
-from merge_adjoining_line_segments import *
+from commands.split_network_segments_at_intersections import *
+from commands.merge_adjoining_line_segments import *
+from commands.delete_segments_zero_length import delete_zero_length
+from commands.check_if_field_has_value import HasFieldValue
+from commands.calc_miles_and_time import calc_miles_time
+from commands.truncate_and_load import replace_bikepedauto_with_merged_and_split_data
 
 #arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
 
@@ -26,8 +30,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 # utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2021_04_09.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb\\TrailsAndPathways_split_at_intersections' #: use when on VPN (update data)
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb\\Roads_SLCo' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb\\TrailsAndPathways_SLCo' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb'
 arcpy.env.workspace = network_file_geodatabase
@@ -78,15 +82,20 @@ def main():
     print("import the transit routes")
     importTransitData()
 
-    #: Unsplit lines.  Do this before spliting lines at intersections. Essentially, this merges all segments with same attributes. After this is done, we can then split the lines at intersections.
-    #merge_similar_adjoining_segments(bike_ped_auto,strDate)
+    #: Unsplit lines (merge).  Do this before spliting lines at intersections. Essentially, this merges all segments with same attributes. After this is done, we can then split the lines at intersections.
+    bike_ped_auto_merged = merge_similar_adjoining_segments(bike_ped_auto,strDate)
 
     #: Split network segments at intersections (call this function from separate python file)
-    #split_network_at_intersections(bike_ped_auto, strDate)
+    bike_ped_auto_merged_and_split = split_network_at_intersections(bike_ped_auto_merged, strDate)
+
+    #: load the merged-and-split dataset into the official BikePedAuto dataset
+    replace_bikepedauto_with_merged_and_split_data(bike_ped_auto, bike_ped_auto_merged_and_split, network_file_geodatabase)
+
+    #: Delete all records where shape legnth is less than 0 (it's possible to end up with some tiny segments after spliting)
+    delete_zero_length(bike_ped_auto)
 
     #: Calculate BikeTime, PedTime, AutoTime, and Length_Miles fields (this has to be done after the unsplit and the split operations)
-    # .........TO DO.........
-    # call same function 3 times, one for bike, one for ped, and one for auto
+    calc_miles_time(bike_ped_auto)
 
     # Export out each transit group (from BikePedAuto) to a separate feature class in the network dataset
     print("creating separate bike network feature class")
@@ -99,7 +108,7 @@ def main():
     #: Export the BikePedAuto to shapefile
 
 
-    print("rallyup_network_data.py script is done!")
+    print("create_network_data.py script is done!")
 
 
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
@@ -327,28 +336,28 @@ def get_SourceDataUsingDefQuery(where_clause, utransFeatureClass, source):
     return 'utransQueried_lyr'
 
  
-# this function checks if the field value has a valid value (that's it's not just an empty string or null value)
-def HasFieldValue(field_value):
-    """ example: (row.STATUS) """
-    if field_value is None:
-        # the value is of NoneType
-        return False
-    else:
-        _str_field_value = str(field_value)
+# # this function checks if the field value has a valid value (that's it's not just an empty string or null value)
+# def HasFieldValue(field_value):
+#     """ example: (row.STATUS) """
+#     if field_value is None:
+#         # the value is of NoneType
+#         return False
+#     else:
+#         _str_field_value = str(field_value)
 
-        # value is not of NoneType
-        if _str_field_value.isdigit():
-            # it's an int
-            if _str_field_value == "":
-                return False
-            else:
-                return True
-        else:
-            # it's not an int
-            if _str_field_value == "" or _str_field_value is None or _str_field_value.isspace():
-                return False
-            else:
-                return True
+#         # value is not of NoneType
+#         if _str_field_value.isdigit():
+#             # it's an int
+#             if _str_field_value == "":
+#                 return False
+#             else:
+#                 return True
+#         else:
+#             # it's not an int
+#             if _str_field_value == "" or _str_field_value is None or _str_field_value.isspace():
+#                 return False
+#             else:
+#                 return True
 
 
 def importTransitData():
