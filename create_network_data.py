@@ -16,6 +16,7 @@ from commands.truncate_and_load import replace_bikepedauto_with_merged_and_split
     # utrans_roads
     # utrans_trails
     # also, you need to be on the state network (VPN) to get the domain codes (line 91)
+    ## use arcgispro-py3 (python 3)
     
     ##: while testing interop stuff:
     #: make sure this is pointing to the correct area: \MultimodalScriptData.gdb\BikePedAuto_template_new
@@ -29,14 +30,14 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
-# utrans_trails =  'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb\\Roads_SLCo' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb\\TrailsAndPathways_SLCo' #: use when on VPN (update data)
+#utrans_trails =  'Database Connections\\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2022_3_9.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2022_3_9.gdb\\TrailsAndPathways' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb'
 arcpy.env.workspace = network_file_geodatabase
 fifty_sites_1mile = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\FiftySites_1mile'
-fifty_sites_halfmile = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\F\iftySites_halfmile'
+fifty_sites_halfmile = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\FiftySites_halfmile'
 counties_mmp = 'C:\\Users\\gbunce\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\Counties_MMP'
 fgdb_dataset_name = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb\\NetworkDataset'
 bike_ped_auto = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb\\NetworkDataset' + '\\BikePedAuto'
@@ -421,7 +422,7 @@ def importTransitData():
             rows_tran_stops = [row_stops for row_stops in arcpy.da.SearchCursor(transit_stops_singlepoints, ['trip_id', 'route_id'], query_string)]
             
             # populate the StopCount field
-            row[2] = len(rows_tran_stops) 
+            row[2] = len(rows_tran_stops)
             
             # populate the travel time field (calc separately for commuter rail and bus/light rail)
             # note: use this calc from below website: [Total travel time = (8.5 mi) / (16.9 mi/hr) + (22 stops)*(18 sec/stop)*(1 hr / 3600 sec) = 0.613 hr = 37 minutes (rounded up to the nearest minute)]

@@ -6,7 +6,6 @@
 # Requirements: Network Analyst Extension
 
 ## use arcgispro-py3 (python 3)
-## I've been using Pro to run this in the application
 ## change gdb date for variable 'new_network_location'
 
 #Import system modules
@@ -22,7 +21,7 @@ try:
     
     #Set local variables
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_05142021.gdb\\NetworkDataset"
+    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_03092022.gdb\\NetworkDataset"
     xml_template = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
     
     #Create an XML template from the original network dataset

@@ -4,7 +4,8 @@ import time
 from datetime import date
 from datetime import datetime
 
-#### User Note ####: change dates (only if you didn't run rallyup_network_data.py on the same day) for fgdb to current dataset (ctrl + f for "#### Note ####:")
+#### User Note ####: change dates (only if you didn't run create_network_data.py on the same day) for fgdb to current dataset (ctrl + f for "#### Note ####:")
+## use arcgispro-py3 (python 3)
 
 #arcpy.env.workspace = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork'
 

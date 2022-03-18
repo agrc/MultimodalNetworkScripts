@@ -14,12 +14,12 @@
 import arcpy
 
 #: Set environment settings
-arcpy.env.workspace = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\interoperabilty_testing\\interop_testing_data.gdb"
+arcpy.env.workspace = "C:\\Users\\gbunce\\Documents\\projects\\UTRANS\\Trails\\split_trails_at_intersections\\split_trails_intersections_June2nd2021.gdb"
 
 #: Set local variables
 trails_paths = "TrailsAndPathways"
 trails_paths_split = "TrailsAndPathways_split_at_intersections"
-dup_uniqueid_table = "duplicate_uniqueids2"
+dup_uniqueid_table = "duplicate_uniqueids"
 
 #: Make feature layer with where clause
 arcpy.MakeFeatureLayer_management(trails_paths, "trails_paths_lyr", "CartoCode <> '8 - Bridge, Tunnel'")
