@@ -31,8 +31,8 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 #utrans_trails =  'Database Connections\\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2022_3_9.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\projects\\SGID\\local_sgid_data\\SGID_2022_3_9.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+utrans_roads = 'C:\\Users\\gbunce\\Documents\\SGID\\local_sgid_data\\SGID_2024_10_16.gdb\\Roads' #: use when on VPN (update data)
+utrans_trails =  'C:\\Users\\gbunce\\Documents\\SGID\\local_sgid_data\\SGID_2024_10_16.gdb\\TrailsAndPathways' #: use when on VPN (update data)
 
 network_file_geodatabase = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb'
 arcpy.env.workspace = network_file_geodatabase
@@ -390,7 +390,8 @@ def importTransitData():
     # add a field in the route fc to hold the number of stops
     arcpy.AddField_management(transit_routes_network_dataset, "RouteType", "TEXT", field_length=15)
     # buffer sgid commuter rail layer and then select by location to find the transit routes that have their center in this buffer - then assing those selected routes a RouteType of 'CommmuterRail'
-    sgid_commuter_rail = r'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde\\SGID.TRANSPORTATION.CommuterRailRoutes_UTA'
+    #sgid_commuter_rail = r'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde\\SGID.TRANSPORTATION.CommuterRailRoutes_UTA'
+    sgid_commuter_rail = 'https://maps.rideuta.com/server/rest/services/Hosted/UTA_FrontRunner_Commuter_Rail_Centerline/FeatureServer/0'
     # buffer the comm rail
     sgid_commuter_rail_buff = r"C:\\Users\\gbunce\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\SGID_CommRailBuff_" + strDate
     arcpy.Buffer_analysis(sgid_commuter_rail, sgid_commuter_rail_buff, 30)
