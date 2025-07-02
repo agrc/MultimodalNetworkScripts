@@ -10,6 +10,10 @@ from commands.check_if_field_has_value import HasFieldValue
 from commands.calc_miles_and_time import calc_miles_time
 from commands.truncate_and_load import replace_bikepedauto_with_merged_and_split_data
 
+start_time = time.time()
+readable_start = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+print("The script start time is {}".format(readable_start))
+
 #arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
 
 #: Notes before running: verify data sources (local SGID data vs SGID data -- home vpn vs at work). Variables to check:
@@ -442,3 +446,9 @@ def importTransitData():
 if __name__ == "__main__":
     # execute only if run as a script
     main()
+
+    print("Script shutting down ...")
+    # Stop timer and print end time in local time
+    readable_end = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    print("The script end time is {}".format(readable_end))
+    print("Time elapsed: {:.2f}s".format(time.time() - start_time))
