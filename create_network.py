@@ -11,6 +11,9 @@
 #Import system modules
 import arcpy
 import os
+import time
+
+today = time.strftime("%m%d%Y")
 
 try:
     #Check out Network Analyst license if available. Fail if the Network Analyst license is not available.
@@ -21,8 +24,9 @@ try:
     
     #Set local variables
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
-    new_network_location = "C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_08132024.gdb\\NetworkDataset"
-    xml_template = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\network_xml_template\\NDTemplate.xml"
+    # new_network_location = r"C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_08132024.gdb\\NetworkDataset"
+    new_network_location = rf"C:\Multimodal Network Data\MM_NetworkDataset_{today}.gdb\NetworkDataset"
+    xml_template = r"C:\Multimodal Network Data\network_xml_template\NDTemplate_update_20250702.xml"
     
     #Create an XML template from the original network dataset
     ##arcpy.na.CreateTemplateFromNetworkDataset(original_network, xml_template)
