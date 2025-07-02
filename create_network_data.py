@@ -120,7 +120,7 @@ def main():
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     # get # Get the dictionary of codes and descriptions for cartocode field, for transfering descriptions to RoadClass network field
     # gdb = 'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde'
-    gdb = r'C:\Users\emneemann\AppData\Roaming\Esri\ArcGISPro\Favorites\internal.agrc.utah.gov (2).sde'
+    gdb = r"C:\Multimodal Network Data\internal.agrc.utah.gov.sde"
     desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
     
     # create list of field names
