@@ -26,7 +26,7 @@ try:
     ##original_network = "C:/data/Region1.gdb/Transportation/Streets_ND"
     # new_network_location = r"C:\\Users\\gbunce\\Documents\projects\\MultimodalNetwork\\MM_NetworkDataset_08132024.gdb\\NetworkDataset"
     new_network_location = rf"C:\Multimodal Network Data\MM_NetworkDataset_{today}.gdb\NetworkDataset"
-    xml_template = r"C:\Multimodal Network Data\network_xml_template\NDTemplate_update_20250702.xml"
+    xml_template = r"C:\Multimodal Network Data\network_xml_template\NDTemplate_update_20250702.xml" # Updated template that uses python instead of VBScript
     
     #Create an XML template from the original network dataset
     ##arcpy.na.CreateTemplateFromNetworkDataset(original_network, xml_template)
