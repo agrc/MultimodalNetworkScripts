@@ -2,7 +2,7 @@ import arcpy
 
 def split_network_at_intersections(bike_ped_auto, strDate):
 
-    bike_ped_auto_split = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\BikePedAutoSplit_" + strDate
+    bike_ped_auto_split = r"C:\Multimodal Network Data\MultimodalScratchData.gdb\BikePedAutoSplit_" + strDate
 
     #: Make feature layer with where clause
     arcpy.MakeFeatureLayer_management(bike_ped_auto, "bike_ped_auto_lyr", "(SourceData = 'Trails' and CartoCode <> '8 - Bridge, Tunnel') OR (SourceData = 'RoadCenterlines' and VERT_LEVEL Not In ('1','2','3'))")

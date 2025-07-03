@@ -2,7 +2,7 @@ import arcpy
 
 def merge_similar_adjoining_segments(bike_ped_auto, strDate):
 
-    bike_ped_auto_merge_adjoined = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\BikePedAutoMergeAdjoined_" + strDate
+    bike_ped_auto_merge_adjoined = r"C:\Multimodal Network Data\MultimodalScratchData.gdb\BikePedAutoMergeAdjoined_" + strDate
     dissolve_fields = ["Name", "Oneway", "Speed", "AutoNetwork", "BikeNetwork", "PedNetwork", "SourceData", "ConnectorNetwork", "CartoCode", "AADT", "AADT_YR", "BIKE_L", "BIKE_R", "VERT_LEVEL"]
     arcpy.management.UnsplitLine(bike_ped_auto, bike_ped_auto_merge_adjoined, dissolve_fields)
 

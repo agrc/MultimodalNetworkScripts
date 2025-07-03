@@ -10,6 +10,10 @@ from commands.check_if_field_has_value import HasFieldValue
 from commands.calc_miles_and_time import calc_miles_time
 from commands.truncate_and_load import replace_bikepedauto_with_merged_and_split_data
 
+start_time = time.time()
+readable_start = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+print("The script start time is {}".format(readable_start))
+
 #arcpy.env.workspace = 'C:\Users\gbunce\Documents\projects\MultimodalNetwork'
 
 #: Notes before running: verify data sources (local SGID data vs SGID data -- home vpn vs at work). Variables to check:
@@ -22,7 +26,7 @@ from commands.truncate_and_load import replace_bikepedauto_with_merged_and_split
     #: make sure this is pointing to the correct area: \MultimodalScriptData.gdb\BikePedAuto_template_new
 
 #### User Note ####: change dates for fgdb to current dataset (ctrl + f for "#### Note ####:")
-transit_route_source = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_TransitData_02152019.gdb\\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
+transit_route_source = r'C:\Multimodal Network Data\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
 
 # get the date
 today = date.today()
@@ -31,30 +35,30 @@ strDate = str(today.month).zfill(2) + str(today.day).zfill(2) +  str(today.year)
 # global variables
 # utrans_roads = 'Database Connections\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\UTRANS.TRANSADMIN.Centerlines_Edit\UTRANS.TRANSADMIN.Roads_Edit' #: use when not on VPN
 #utrans_trails =  'Database Connections\\DC_TRANSADMIN@UTRANS@utrans.agrc.utah.gov.sde\\UTRANS.TRANSADMIN.Trails_Paths' #: use when not on VPN
-utrans_roads = 'C:\\Users\\gbunce\\Documents\\SGID\\local_sgid_data\\SGID_2024_10_16.gdb\\Roads' #: use when on VPN (update data)
-utrans_trails =  'C:\\Users\\gbunce\\Documents\\SGID\\local_sgid_data\\SGID_2024_10_16.gdb\\TrailsAndPathways' #: use when on VPN (update data)
+utrans_roads = r'C:\Multimodal Network Data\SGID_data_20250702.gdb\Roads' #: use when on VPN (update data)
+utrans_trails =  r'C:\Multimodal Network Data\SGID_data_20250702.gdb\TrailsAndPathways' #: use when on VPN (update data)
 
-network_file_geodatabase = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb'
+network_file_geodatabase = r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate + '.gdb'
 arcpy.env.workspace = network_file_geodatabase
-fifty_sites_1mile = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\FiftySites_1mile'
-fifty_sites_halfmile = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\FiftySites_halfmile'
-counties_mmp = 'C:\\Users\\gbunce\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\Counties_MMP'
-fgdb_dataset_name = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb\\NetworkDataset'
-bike_ped_auto = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate + '.gdb\\NetworkDataset' + '\\BikePedAuto'
+fifty_sites_1mile = r'C:\Multimodal Network Data\MultimodalScriptData.gdb\FiftySites_1mile'
+fifty_sites_halfmile = r'C:\Multimodal Network Data\MultimodalScriptData.gdb\FiftySites_halfmile'
+counties_mmp = r'C:\Multimodal Network Data\MultimodalScriptData.gdb\Counties_MMP'
+fgdb_dataset_name = r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate + r'.gdb\NetworkDataset'
+bike_ped_auto = r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate + r'.gdb\NetworkDataset' + r'\BikePedAuto'
 
 
 # main function
 def main():
     # create new fgdb
     print(network_file_geodatabase)
-    arcpy.CreateFileGDB_management('C:\\Users\\gbunce\Documents\\projects\\MultimodalNetwork', 'MM_NetworkDataset_' + strDate +  '.gdb')
+    arcpy.CreateFileGDB_management(r'C:\Multimodal Network Data', 'MM_NetworkDataset_' + strDate +  '.gdb')
 
     # create dataset in the fgdb
     arcpy.CreateFeatureDataset_management(network_file_geodatabase, 'NetworkDataset', utrans_roads)
 
     # create new feature class in the fgdb
     arcpy.CreateFeatureclass_management(fgdb_dataset_name, "BikePedAuto", "POLYLINE", 
-                                        'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScriptData.gdb\\BikePedAuto_template_new', "DISABLED", "DISABLED", 
+                                        r'C:\Multimodal Network Data\MultimodalScriptData.gdb\BikePedAuto_template_new', "DISABLED", "DISABLED", 
                                         utrans_roads)
 
     # create a list of fields for the BikePedAuto feature class 
@@ -107,7 +111,7 @@ def main():
     #arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, fgdb_dataset_name, 'AutoNetwork', "AutoNetwork = 'Y'")
 
     #: Export the BikePedAuto to shapefile
-    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork', 'BikePedAuto_' + strDate + '.shp')
+    arcpy.FeatureClassToFeatureClass_conversion(bike_ped_auto, r'C:\Multimodal Network Data', 'BikePedAuto_' + strDate + '.shp')
 
     print("create_network_data.py script is done!")
 
@@ -115,7 +119,8 @@ def main():
 # this function imports the user-defined utrans roads into the the netork dataset feature class 
 def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
     # get # Get the dictionary of codes and descriptions for cartocode field, for transfering descriptions to RoadClass network field
-    gdb = 'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde'
+    # gdb = 'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde'
+    gdb = r"C:\Multimodal Network Data\internal.agrc.utah.gov.sde"
     desc_lu = [d.codedValues for d in arcpy.da.ListDomains(gdb) if d.name == 'CVDomain_CartoCode'][0]
     
     # create list of field names
@@ -202,7 +207,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
 
                 # create a list of values that will be used to construct new row
                 insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, aadt, aadt_yr, bike_l, bike_r, vertlevel, utrans_row[12])]
-                print(insert_row_values)
+                # print(insert_row_values)
 
                 # insert the new row with the list of values
                 for insert_row in insert_row_values:
@@ -213,7 +218,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
 def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
     
     # convert features in trail dataset from multipart to singlepart
-    output = 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\trails_singlepart' + '_' + strDate
+    output = r'C:\Multimodal Network Data\MultimodalScratchData.gdb\trails_singlepart' + '_' + strDate
     trails_singlepart = arcpy.MultipartToSinglepart_management(utrans_trails_to_import, output)
     
     # create list of field names
@@ -276,7 +281,7 @@ def import_TrailsIntoNetworkDataset(utrans_trails_to_import):
 
                     # create a list of values that will be used to construct new row
                     insert_row_values = [(utrans_row[0], miles, oneway, source_data, speed_lmt, drive_time, ped_time, bike_time, auto_network, ped_network, bike_network, connector_network, carto_code, utrans_row[5])]
-                    print(insert_row_values)
+                    # print(insert_row_values)
 
                     # insert the new row with the list of values
                     for insert_row in insert_row_values:
@@ -308,7 +313,7 @@ def get_SouceDataUsingSpatialQuery(spatial_boundary, utransFeatureClass, source)
     if matchcount == 0:
         print('no features matched spatial and attribute criteria')
     else:
-        intersected_roads = arcpy.CopyFeatures_management('utransIntersected_lyr', 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\utransIntersected' + source + '_' + strDate)
+        intersected_roads = arcpy.CopyFeatures_management('utransIntersected_lyr', r'C:\Multimodal Network Data\MultimodalScratchData.gdb\utransIntersected' + source + '_' + strDate)
         #print('{0} cities that matched criteria written to {0}'.format(matchcount, utrans_IntersectedRoads))
 
     return 'utransIntersected_lyr'
@@ -331,7 +336,7 @@ def get_SourceDataUsingDefQuery(where_clause, utransFeatureClass, source):
     if matchcount == 0:
         print('no features matched spatial and attribute criteria')
     else:
-        intersected_roads = arcpy.CopyFeatures_management('utransQueried_lyr', 'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\utransWhereClause' + source + '_' + strDate)
+        intersected_roads = arcpy.CopyFeatures_management('utransQueried_lyr', r'C:\Multimodal Network Data\MultimodalScratchData.gdb\utransWhereClause' + source + '_' + strDate)
         #print('{0} cities that matched criteria written to {0}'.format(matchcount, utrans_IntersectedRoads))
 
     return 'utransQueried_lyr'
@@ -363,19 +368,19 @@ def get_SourceDataUsingDefQuery(where_clause, utransFeatureClass, source):
 
 def importTransitData():
     # import transit stops
-    transit_stops_multipoint = r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_TransitData_02152019.gdb\\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset  
+    transit_stops_multipoint = r'C:\Multimodal Network Data\MM_TransitData_02152019.gdb\TransitStops' #### Note ####: change dates (if it's been updated) for fgdb to current dataset  
     # explode transit stops to single points (currently they are mulitpoints)
     print("explode multipoint stops to single points")
-    transit_stops_singlepoints = "C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\TranStops_" + strDate
+    transit_stops_singlepoints = r"C:\Multimodal Network Data\MultimodalScratchData.gdb\TranStops_" + strDate
     arcpy.FeatureVerticesToPoints_management(transit_stops_multipoint, transit_stops_singlepoints, "ALL")       
     print("import transit stops")
-    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate +  '.gdb\\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
+    arcpy.FeatureClassToFeatureClass_conversion(transit_stops_singlepoints, r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate +  r'.gdb\NetworkDataset', 'TransitStops') #### Note ####: change dates (if it's been updated) for fgdb to current dataset 
 
 
     # import the transit routes feature class
     # transit_route_source = r'C:\Users\gbunce\Documents\projects\MultimodalNetwork\MM_TransitData_02152019.gdb\TransitRoutes' #### Note ####: change transit data date (if it's been updated)
-    arcpy.FeatureClassToFeatureClass_conversion(transit_route_source, r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate +  '.gdb' + '\\NetworkDataset', 'TransitRoutes')
-    transit_routes_network_dataset =  r'C:\\Users\\gbunce\\Documents\\projects\\MultimodalNetwork\\MM_NetworkDataset_' + strDate +  '.gdb' + '\\NetworkDataset\\TransitRoutes'   
+    arcpy.FeatureClassToFeatureClass_conversion(transit_route_source, r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate +  '.gdb' + r'\NetworkDataset', 'TransitRoutes')
+    transit_routes_network_dataset =  r'C:\Multimodal Network Data\MM_NetworkDataset_' + strDate +  '.gdb' + r'\NetworkDataset\TransitRoutes'   
 
     # add miles field
     arcpy.AddField_management(transit_routes_network_dataset, "Length_Miles", "DOUBLE", "", "", "", "", "NULLABLE")
@@ -393,7 +398,7 @@ def importTransitData():
     #sgid_commuter_rail = r'C:\\Users\\gbunce\AppData\\Roaming\\ESRI\ArcGISPro\\Favorites\\internal@SGID@internal.agrc.utah.gov.sde\\SGID.TRANSPORTATION.CommuterRailRoutes_UTA'
     sgid_commuter_rail = 'https://maps.rideuta.com/server/rest/services/Hosted/UTA_FrontRunner_Commuter_Rail_Centerline/FeatureServer/0'
     # buffer the comm rail
-    sgid_commuter_rail_buff = r"C:\\Users\\gbunce\Documents\\projects\\MultimodalNetwork\\MultimodalScratchData.gdb\\SGID_CommRailBuff_" + strDate
+    sgid_commuter_rail_buff = r"C:\Multimodal Network Data\MultimodalScratchData.gdb\SGID_CommRailBuff_" + strDate
     arcpy.Buffer_analysis(sgid_commuter_rail, sgid_commuter_rail_buff, 30)
     # make feature layer of transit (required input for selection by location)
     arcpy.MakeFeatureLayer_management(transit_routes_network_dataset,'lyr_transit_fgdb')
@@ -442,3 +447,9 @@ def importTransitData():
 if __name__ == "__main__":
     # execute only if run as a script
     main()
+
+    print("Script shutting down ...")
+    # Stop timer and print end time in local time
+    readable_end = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    print("The script end time is {}".format(readable_end))
+    print("Time elapsed: {:.2f}s".format(time.time() - start_time))
