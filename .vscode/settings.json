@@ -1,2 +1,47 @@
 {
+  "cSpell.words": [
+    "agrc",
+    "arcgis",
+    "arcpy",
+    "Codecov",
+    "finditer",
+    "getenv",
+    "instafail",
+    "mapserv",
+    "metatable",
+    "mssql",
+    "ODBC",
+    "oidc",
+    "opensgid",
+    "pgsql",
+    "pipx",
+    "projectname",
+    "psycopg",
+    "pygsheets",
+    "pyodbc",
+    "pypa",
+    "pypi",
+    "pytest",
+    "rindex",
+    "sgid",
+    "UGRC",
+    "venv",
+    "worknote"
+  ],
+  "editor.formatOnSave": true,
+  "editor.rulers": [120],
+  "coverage-gutters.showGutterCoverage": false,
+  "coverage-gutters.showLineCoverage": true,
+  "coverage-gutters.showRulerCoverage": false,
+  "coverage-gutters.highlightdark": "rgb(61, 153, 112, .05)",
+  "coverage-gutters.noHighlightDark": "rgb(255, 65, 54, .05)",
+  "coverage-gutters.partialHighlightDark": "rgb(255, 133, 27, .05)",
+  "python.languageServer": "Pylance",
+  "python.testing.pytestEnabled": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
 }
