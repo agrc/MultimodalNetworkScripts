@@ -174,7 +174,7 @@ def import_RoadsIntoNetworkDataset(utrans_roads_to_import):
                     oneway = "B"
                 if utrans_row[1] == '1':
                     oneway = "TF"
-                if utrans_row[2] == '2':
+                if utrans_row[1] == '2':
                     oneway = "FT"
 
                 # transfer the speed value
